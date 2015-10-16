@@ -5,7 +5,7 @@ $var title: WindowDraw.
 <!-- <div class="row clearfix">
 	<div class="col-md-12 column">
  -->		
-		<canvas id="drawCanvas" resize="true" style="border:1px solid #000000;background: black;">
+		<canvas id="drawCanvas" keepalive="true" resize="true" style="border:1px solid #000000;background: black;">
 			
 		</canvas>
 
@@ -31,14 +31,16 @@ $var title: WindowDraw.
  -->
 	 	<script type="text/javascript">
 
+	 		paths = [];
+
 			window.onload = function() {
 
 				// Get a reference to the canvas object
 				var canvas = document.getElementById('drawCanvas');
 				var destWidth = 640;
 				var destHeight = 480;
-				var xr = window.innerWidth / destWidth;
-				var yr = window.innerHeight / destHeight;
+				var xr = (window.innerWidth-10) / destWidth;
+				var yr = (window.innerHeight-10) / destHeight;
 				var zoom = Math.min(xr,yr);
 				canvas.width = destWidth * zoom;
 				canvas.height = destHeight * zoom;
@@ -46,18 +48,53 @@ $var title: WindowDraw.
 				// Create an empty project and a view for the canvas:
 				paper.setup(canvas);
 				with (paper) {
-					var source = new EventSource("/sse");
+					var source = new EventSource("/wel/sse");
+					text = new PointText(new Point(20, 20));
+					text.justification = 'left';
+					text.fillColor = 'green';
+					text.fontSize = 24;
+					text.content = 'draw on your phone';
 					source.onmessage = function(event) {
 					    console.log("server update: " + event.data);
+					    if (event.data.length == 0)
+					    	return;
 					    path = new Path()
 					    path.importJSON(event.data);
-					    path.scaling = 1/zoom;
+					    path.scale(zoom,[0,0]);
+					    console.log(zoom);
 					    path.smooth();
-					    path.strokeColor = [1, 0.3, 0.3, 0.8];
-					    path.strokeWidth = 5,
-					    console.log("path: " + path.segments);
+					    //path.strokeColor = [1, 0.3, 0.3, 0.8];
+					    path.strokeWidth = 5*zoom,
+					    paths.push(path);
 					    view.draw();
+
 					};
+					
+				    view.onFrame = function(event) {
+						// On each frame, rotate the path by 3 degrees:
+						for (p in paths) {
+							//console.log(paths[p].strokeColor);
+							t = paths[p].strokeColor.alpha;
+							t = t - 0.001;
+							//paths[p].strokeWidth = Math.random()*5+1;
+							for (s in paths[p].segments) {
+								paths[p].segments[s].point.x +=  (Math.random()-0.5)*0.3;
+								paths[p].segments[s].point.y +=  (Math.random()-0.5)*0.3;
+							}
+							//console.log(t);
+							if (t <= 0.0) {
+								paths[p].remove();
+								paths.splice(p,1);
+							} else {
+								paths[p].strokeColor.alpha = t;
+							}
+							
+						}
+						
+					}
+					
+
+
 				}
 			}
 		</script>

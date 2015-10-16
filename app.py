@@ -10,9 +10,9 @@ from Queue import Queue, Empty
 import config
 
 urls = (
-    '/', 'index',
-    '/sse', 'SSEServer',
-    '/view', 'view',
+    '/wel/', 'index',
+    '/wel/sse', 'SSEServer',
+    '/wel/view', 'view',
 )
 
 renderer = web.template.render('templates', base="base", globals=globals())
@@ -76,7 +76,7 @@ class SSEServer:
             if e is not None:
                 r = self.response(str(e))
             else:
-                r = self.response('{}')
+                r = self.response('')
             yield r
 
 

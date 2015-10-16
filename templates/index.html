@@ -2,10 +2,7 @@ $def with (data)
 
 $var title: WindowDraw.
 
-<!-- <div class="row clearfix">
-	<div class="col-md-12 column">
- -->		
-		<canvas id="myCanvas" border="1" resize="true" style="border:1px solid #000000;background: black;">
+ 		<canvas id="myCanvas" border="1" keepalive="true" resize="true" style="border:2px solid #555555;background: black;">
 			
 		</canvas>
 
@@ -31,9 +28,12 @@ $var title: WindowDraw.
  -->
 	 	<script type="text/javascript">
 	 		function send_path(path) {
-	 			$$.post('/',path);
+	 			$$.post('/wel/',path);
 	 		}
 		// Only executed our code once the DOM is ready.
+
+	 		paths = [];
+
 
 
 			window.onload = function() {
@@ -42,8 +42,8 @@ $var title: WindowDraw.
 				var canvas = document.getElementById('myCanvas');
 				var destWidth = 640;
 				var destHeight = 480;
-				var xr = window.innerWidth / destWidth;
-				var yr = window.innerHeight / destHeight;
+				var xr = (window.innerWidth-10) / destWidth;
+				var yr = (window.innerHeight-10) / destHeight;
 				var zoom = Math.min(xr,yr);
 				canvas.width = destWidth * zoom;
 				canvas.height = destHeight * zoom;
@@ -57,7 +57,11 @@ $var title: WindowDraw.
 					// Define a mousedown and mousedrag handler
 					tool.onMouseDown = function(event) {
 						path = new Path();
-						path.strokeColor = 'red';
+						color = [	Math.random()*0.5 + 0.5,
+									Math.random()*0.5 + 0.5,
+									Math.random()*0.5 + 0.5, 1]
+						path.strokeColor = color;
+						path.strokeWidth = 5*zoom,
 						path.add(event.point);
 					}
 
@@ -70,15 +74,31 @@ $var title: WindowDraw.
 						var data = {};
 						data['path'] = path.exportJSON();
 						data['zoom'] = zoom;
-						path.remove();
+						paths.push(path);
+						//path.remove();
 						send_path(data);
+					}
+
+				    view.onFrame = function(event) {
+						// On each frame, rotate the path by 3 degrees:
+						for (p in paths) {
+							//console.log(paths[p].strokeColor);
+							t = paths[p].strokeColor.alpha;
+							t = t - 0.001;
+							//paths[p].strokeWidth = Math.random()*5+1;
+							//console.log(t);
+							if (t <= 0.0) {
+								paths[p].remove();
+								paths.splice(p,1);
+							} else {
+								paths[p].strokeColor.alpha = t;
+							}
+							
+						}
+						
 					}
 
 
 				}
 			}
 		</script>
-
-<!-- 	</div>
-</div>
- -->
