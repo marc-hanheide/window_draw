@@ -2,7 +2,7 @@
 
 import web
 import signal
-from json import dumps
+from json import dumps,loads
 import time
 import sys
 from Queue import Queue, Empty
@@ -11,7 +11,8 @@ import config
 
 urls = (
     '/', 'index',
-    '/sse', 'SSEServer'
+    '/sse', 'SSEServer',
+    '/view', 'view',
 )
 
 renderer = web.template.render('templates', base="base", globals=globals())
@@ -28,6 +29,7 @@ app = WindowDrawApp(urls, globals())
 
 event_queue = Queue()
 
+
 ### Renderers for actual interface:
 class index:
     def GET(self):
@@ -36,8 +38,21 @@ class index:
 
     def POST(self):
         i = web.input()
-        event_queue.put(i['path'])
+        p = loads(i['path'])
+        zoom = float(i['zoom'])
+        for s in p[1]['segments']:
+            s[0] /= zoom
+            s[1] /= zoom
+        new_path = dumps(p)
+        event_queue.put(new_path)
         return web.ok()
+
+
+### Renderers for actual interface:
+class view:
+    def GET(self):
+        data = {}
+        return renderer.view(data)
 
 
 class SSEServer:
@@ -50,7 +65,7 @@ class SSEServer:
         block = False
         web.header("Content-Type", "text/event-stream")
         web.header('Cache-Control', 'no-cache')
-        web.header('Content-length:', 1000)
+        web.header('Content-length:', 0)
         while is_running:
             print "await response"
             try:

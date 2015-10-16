@@ -5,11 +5,7 @@ $var title: WindowDraw.
 <!-- <div class="row clearfix">
 	<div class="col-md-12 column">
  -->		
-		<canvas id="myCanvas" resize="true">
-			
-		</canvas>
-		<hr/>
-		<canvas id="drawCanvas" resize="true">
+		<canvas id="myCanvas" border="1" resize="true" style="border:1px solid #000000;background: black;">
 			
 		</canvas>
 
@@ -43,24 +39,14 @@ $var title: WindowDraw.
 			window.onload = function() {
 
 				// Get a reference to the canvas object
-				var canvas = document.getElementById('drawCanvas');
-				// Create an empty project and a view for the canvas:
-				paper.setup(canvas);
-				with (paper) {
-					var source = new EventSource("/sse");
-					source.onmessage = function(event) {
-					    console.log("server update: " + event.data);
-					    var path = Path.importJSON(event.data);
-					    path.strokeColor = 'red';
-					    console.log("path: " + path.segments);
-					    view.draw();
-					};
-				}
-
-
-
-				// Get a reference to the canvas object
 				var canvas = document.getElementById('myCanvas');
+				var destWidth = 640;
+				var destHeight = 480;
+				var xr = window.innerWidth / destWidth;
+				var yr = window.innerHeight / destHeight;
+				var zoom = Math.min(xr,yr);
+				canvas.width = destWidth * zoom;
+				canvas.height = destHeight * zoom;
 				// Create an empty project and a view for the canvas:
 				paper.setup(canvas);
 				with (paper) {
@@ -71,7 +57,7 @@ $var title: WindowDraw.
 					// Define a mousedown and mousedrag handler
 					tool.onMouseDown = function(event) {
 						path = new Path();
-						path.strokeColor = 'black';
+						path.strokeColor = 'red';
 						path.add(event.point);
 					}
 
@@ -82,7 +68,9 @@ $var title: WindowDraw.
 					tool.onMouseUp = function(event) {
 						console.log("send path");
 						var data = {};
-						data['path'] = path.exportJSON()
+						data['path'] = path.exportJSON();
+						data['zoom'] = zoom;
+						path.remove();
 						send_path(data);
 					}
 
