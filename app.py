@@ -5,6 +5,7 @@ import signal
 from json import dumps,loads
 import time
 import sys
+from os import _exit
 from Queue import Queue, Empty
 
 import config
@@ -70,7 +71,7 @@ class SSEServer:
         while is_running:
             print "await response"
             try:
-                e = event_queue.get(block=block)
+                e = event_queue.get(block=block, timeout=sys.maxint)
             except Empty as e:
                 e = None
             block = True
@@ -83,7 +84,8 @@ class SSEServer:
 
 def signal_handler(signum, frame):
     print "stopped."
-    sys.exit(0)
+    _exit(signal.SIGTERM)
+    #sys.exit(0)
     #app.stop()
     #is_running = False
 
