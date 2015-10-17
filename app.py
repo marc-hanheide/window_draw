@@ -40,9 +40,10 @@ class index:
         i = web.input()
         p = loads(i['path'])
         zoom = float(i['zoom'])
+        pixel_ratio = float(i['pixel_ratio'])
         for s in p[1]['segments']:
-            s[0] /= zoom
-            s[1] /= zoom
+            s[0] /= (zoom / pixel_ratio)
+            s[1] /= (zoom / pixel_ratio)
         new_path = dumps(p)
         event_queue.put(new_path)
         return web.ok()

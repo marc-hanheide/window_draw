@@ -5,7 +5,7 @@ $var title: WindowDraw.
 <!-- <div class="row clearfix">
 	<div class="col-md-12 column">
  -->		
-		<canvas id="drawCanvas" keepalive="true" resize="true" style="border:1px solid #000000;background: black;">
+		<canvas id="drawCanvas" keepalive="true" resize="true" style="border:1px solid #666666;background: black;">
 			
 		</canvas>
 
@@ -32,22 +32,58 @@ $var title: WindowDraw.
 	 	<script type="text/javascript">
 
 	 		paths = [];
+			destWidth = 640.0;
+			destHeight = 640.0;
+			zoom = 1;
+			pixel_ratio = 1;
+
+
+
+	 		function maximise(view) {
+				console.log("window: x=" + window.innerWidth + " y=" + window.innerHeight);
+				var xr = (window.innerWidth-50) / destWidth;
+				var yr = (window.innerHeight-50) / destHeight;
+				zoom = Math.min(xr,yr);
+				console.log("before view: x="+view.viewSize.width+" y="+view.viewSize.height);
+				pixel_ratio = view.pixelRatio;
+				var canvas = document.getElementById('myCanvas');
+				view.viewSize.width = destWidth /pixel_ratio * zoom;
+				view.viewSize.height = destWidth /pixel_ratio * zoom;
+				console.log("after view: x="+view.viewSize.width+" y="+view.viewSize.height);
+				// canvas.width = destWidth  * zoom;
+				// canvas.height = destHeight  * zoom;
+				// console.log(destHeight * zoom+ " " + canvas.height);
+				// console.log(destHeight * zoom+ " " + canvas.height);
+				//console.log(view.viewSize);
+				//console.log(pixel_ratio);
+
+
+	 		}
+
+	 		window.onresize = function(event) {
+				console.log("resize.view: x="+paper.view.viewSize.width+" y="+paper.view.viewSize.height);
+				console.log(event.target.innerWidth);
+				maximise(paper.view);
+
+	 		}
+
 
 			window.onload = function() {
 
 				// Get a reference to the canvas object
 				var canvas = document.getElementById('drawCanvas');
-				var destWidth = 640;
-				var destHeight = 480;
-				var xr = (window.innerWidth-10) / destWidth;
-				var yr = (window.innerHeight-10) / destHeight;
-				var zoom = Math.min(xr,yr);
-				canvas.width = destWidth * zoom;
-				canvas.height = destHeight * zoom;
+				// var destWidth = 640;
+				// var destHeight = 480;
+				// var xr = (window.innerWidth-10) / destWidth;
+				// var yr = (window.innerHeight-10) / destHeight;
+				// var zoom = Math.min(xr,yr);
+				// canvas.width = destWidth * zoom;
+				// canvas.height = destHeight * zoom;
 
 				// Create an empty project and a view for the canvas:
 				paper.setup(canvas);
 				with (paper) {
+					maximise(view);
 					var source = new EventSource("/wel/sse");
 					text = new PointText(new Point(20, 20));
 					text.justification = 'left';
