@@ -5,10 +5,12 @@ import signal
 from json import dumps,loads
 import time
 import sys
+from threading import Condition
 from os import _exit
-from Queue import Queue, Empty
 
 import config
+
+web.config.debug = False
 
 urls = (
     '/wel/', 'index',
@@ -20,24 +22,39 @@ renderer = web.template.render('templates', base="base", globals=globals())
 
 is_running = True
 
+
 class WindowDrawApp(web.application):
     def run(self, *middleware):
         func = self.wsgifunc(*middleware)
         return web.httpserver.runsimple(func, ('0.0.0.0', config.listen_port))
 
+
 app = WindowDrawApp(urls, globals())
 
+session = web.session.Session(app,
+                              web.session.DiskStore('sessions'),
+                              initializer={'count': 0})
 
-event_queue = Queue()
+web.config.session_parameters['timeout'] = 3600
+
+new_path_cond = Condition()
+current_path = None
 
 
 ### Renderers for actual interface:
 class index:
     def GET(self):
+        session.count += 1
+        session.env = {}
+        for (k, v) in web.ctx.env.items():
+            if type(v) is str:
+                session.env[k] = v
+        print session.env
         data = {}
         return renderer.index(data)
 
     def POST(self):
+        global current_path
         i = web.input()
         p = loads(i['path'])
         zoom = float(i['zoom'])
@@ -45,8 +62,12 @@ class index:
         for s in p[1]['segments']:
             s[0] /= (zoom / pixel_ratio)
             s[1] /= (zoom / pixel_ratio)
-        new_path = dumps(p)
-        event_queue.put(new_path)
+        new_path_cond.acquire()
+        try:
+            current_path = dumps(p)
+            new_path_cond.notifyAll()
+        finally:
+            new_path_cond.release()
         return web.ok()
 
 
@@ -69,11 +90,13 @@ class SSEServer:
         web.header('Cache-Control', 'no-cache')
         web.header('Content-length:', 0)
         while is_running:
-            print "await response"
+            new_path_cond.acquire()
             try:
-                e = event_queue.get(block=block, timeout=sys.maxint)
-            except Empty as e:
-                e = None
+                if block:
+                    new_path_cond.wait(timeout=sys.maxint)
+                e = current_path
+            finally:
+                new_path_cond.release()
             block = True
             if e is not None:
                 r = self.response(str(e))
@@ -83,11 +106,7 @@ class SSEServer:
 
 
 def signal_handler(signum, frame):
-    print "stopped."
     _exit(signal.SIGTERM)
-    #sys.exit(0)
-    #app.stop()
-    #is_running = False
 
 
 if __name__ == '__main__':
