@@ -91,13 +91,13 @@ $var title: WindowDraw.
 					text.fontSize = 24;
 					text.content = 'draw on your phone';
 					source.onmessage = function(event) {
-					    console.log("server update: " + event.data);
-					    if (event.data.length == 0)
+						var d = JSON.parse(event.data);
+
+					    if (d['path'].length == 0)
 					    	return;
 					    path = new Path()
-					    path.importJSON(event.data);
+					    path.importJSON(d['path']);
 					    path.scale(zoom,[0,0]);
-					    console.log(zoom);
 					    path.smooth();
 					    //path.strokeColor = [1, 0.3, 0.3, 0.8];
 					    path.strokeWidth = 5*zoom,

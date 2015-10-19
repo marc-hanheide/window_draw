@@ -38,7 +38,10 @@ session = web.session.Session(app,
 web.config.session_parameters['timeout'] = 3600
 
 new_path_cond = Condition()
-current_path = None
+current_path = dumps({'path': [],
+                     'dummy': range(1, 2048),  # data to stop proxy buffering
+                      })
+
 
 
 ### Renderers for actual interface:
@@ -64,7 +67,11 @@ class index:
             s[1] /= (zoom / pixel_ratio)
         new_path_cond.acquire()
         try:
-            current_path = dumps(p)
+            d = {
+                'path': p,
+                'dummy': range(1, 2048),  # dummy data to stop proxy buffering
+            }
+            current_path = dumps(d)
             new_path_cond.notifyAll()
         finally:
             new_path_cond.release()
@@ -101,7 +108,7 @@ class SSEServer:
             if e is not None:
                 r = self.response(str(e))
             else:
-                r = self.response('')
+                r = self.response(str(e))
             yield r
 
 
