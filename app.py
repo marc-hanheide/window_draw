@@ -8,7 +8,10 @@ import sys
 from threading import Condition
 from os import _exit
 
+from twython import Twython, TwythonError
+
 import config
+
 
 web.config.debug = False
 
@@ -23,6 +26,60 @@ urls = (
 renderer = web.template.render('templates', base="base", globals=globals())
 
 is_running = True
+
+
+class Tweeter():
+
+    TWITTER_CONFIG_FILE = 'twitter_config.json'
+
+    def __init__(self):
+        try:
+            with file(self.TWITTER_CONFIG_FILE) as f:
+                self._twitter_config = loads(f.read())['twitter']
+                self._twitter = Twython(
+                    self._twitter_config['consumer_key'],
+                    self._twitter_config['consumer_secret'],
+                    self._twitter_config['access_token'],
+                    self._twitter_config['access_token_secret'])
+        except TwythonError as e:
+            print e
+        except Exception as e:
+            print "tweeting disabled as no valid credentials found: %s" \
+                % e.message
+            self._twitter = None
+
+    def tweet(self, text):
+        if self._twitter is None:
+            return
+
+        nchar = len(text)
+        print "Tweeting %s ... (%d)" % (text, nchar)
+        if nchar < 140:
+            try:
+                self._twitter.update_status(status=text)
+            except TwythonError as e:
+                print e
+        else:
+            print "tweet of more than 140 chars not allowed"
+
+    def tweet_photo(self, text, photo_path):
+        if self._twitter is None:
+            return
+
+        nchar = len(text)
+
+        print "Tweeting %s with photo ... (%d)" % (text, nchar)
+        if nchar < 140:
+            try:
+                photo = open(photo_path, 'rb')
+                self._twitter.update_status_with_media(status=text, media=photo)
+            except TwythonError as e:
+                print e
+        else:
+            print "tweet of more than 140 chars not allowed"
+
+
+tweeter = Tweeter()
 
 
 class WindowDrawApp(web.application):
