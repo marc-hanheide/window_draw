@@ -15,6 +15,44 @@ $def with (page, vars=None)
 		<script type="text/javascript" src="/static/js/scripts.js"></script>
 		<script type="text/javascript" src="/static/js/paper-full.min.js"></script>
 		<link href="/static/css/style.css" rel="stylesheet" />
+	 	<script type="text/javascript">
+
+	 		paths = [];
+			destWidth = $config.config['width'];
+			destHeight = $config.config['height'];
+			zoom = 1;
+			pixel_ratio = 1;
+
+	 		function maximise(view) {
+				console.log("window: x=" + window.innerWidth + " y=" + window.innerHeight);
+				var xr = (window.innerWidth-50) / destWidth;
+				var yr = (window.innerHeight-50) / destHeight;
+				zoom = Math.min(xr,yr);
+				console.log("before view: x="+view.viewSize.width+" y="+view.viewSize.height);
+				pixel_ratio = view.pixelRatio;
+				var canvas = document.getElementById('myCanvas');
+				view.viewSize.width = destWidth /pixel_ratio * zoom;
+				view.viewSize.height = destHeight /pixel_ratio * zoom;
+				console.log("after view: x="+view.viewSize.width+" y="+view.viewSize.height);
+				// canvas.width = destWidth  * zoom;
+				// canvas.height = destHeight  * zoom;
+				// console.log(destHeight * zoom+ " " + canvas.height);
+				// console.log(destHeight * zoom+ " " + canvas.height);
+				//console.log(view.viewSize);
+				//console.log(pixel_ratio);
+
+
+	 		}
+
+	 		window.onresize = function(event) {
+				console.log("resize.view: x="+paper.view.viewSize.width+" y="+paper.view.viewSize.height);
+				console.log(event.target.innerWidth);
+				maximise(paper.view);
+
+	 		}
+
+		</script>
+
 
 	</head>
 

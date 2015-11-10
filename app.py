@@ -2,8 +2,8 @@
 
 import web
 import signal
-from json import dumps,loads
-import time
+from json import dumps
+from json import loads
 import sys
 from threading import Condition
 from os import _exit
@@ -11,6 +11,7 @@ from os import _exit
 import config
 
 web.config.debug = False
+
 
 urls = (
     '/wel/', 'index',
@@ -29,7 +30,10 @@ class WindowDrawApp(web.application):
         return web.httpserver.runsimple(func, ('0.0.0.0', config.listen_port))
 
 
-app = WindowDrawApp(urls, globals())
+if __name__ == '__main__':
+    app = WindowDrawApp(urls, globals())
+else:
+    app = web.application(urls, globals(), autoreload=False)
 
 session = web.session.Session(app,
                               web.session.DiskStore('sessions'),
@@ -43,7 +47,6 @@ current_path = dumps({'path': [],
                       })
 
 
-
 ### Renderers for actual interface:
 class index:
     def GET(self):
@@ -52,9 +55,7 @@ class index:
         for (k, v) in web.ctx.env.items():
             if type(v) is str:
                 session.env[k] = v
-        print session.env
-        data = {}
-        return renderer.index(data)
+        return renderer.index(config.config)
 
     def POST(self):
         global current_path
@@ -81,8 +82,7 @@ class index:
 ### Renderers for actual interface:
 class view:
     def GET(self):
-        data = {}
-        return renderer.view(data)
+        return renderer.view(config.config)
 
 
 class SSEServer:
@@ -119,3 +119,5 @@ def signal_handler(signum, frame):
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
     app.run()
+else:
+    application = app.wsgifunc()

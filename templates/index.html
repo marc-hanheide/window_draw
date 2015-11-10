@@ -2,140 +2,80 @@ $def with (data)
 
 $var title: WindowDraw.
 
- 		<canvas id="myCanvas" border="1" keepalive="true" width="600" height="600" resize="false" style="border:2px solid #555555;background: black;">
-			
-		</canvas>
+	<canvas id="myCanvas" border="1" keepalive="true" width="600" height="600" resize="false" style="border:2px solid #555555;background: black;">
+</canvas>
 
+	<script type="text/javascript">
+		function send_path(path) {
+			$$.post('/wel/',path);
+		}
 
-<!-- 		<script type="text/paperscript" canvas="myCanvas">
-			// Create a Paper.js Path to draw a line into it:
+	window.onload = function() {
 
-			var path = new Path();
-			// Give the stroke a color
-			path.strokeColor = 'black';
-			var start = new Point(100, 100);
-			// Move to start and draw a line from there
-			path.moveTo(start);
-			// Note the plus operator on Point objects.
-			// PaperScript does that for us, and much more!
-			path.lineTo(start + [ 100, -50 ]);
-
-
-			// This function is called whenever the user
-			// clicks the mouse in the view:
-
-		</script>
- -->
-	 	<script type="text/javascript">
-	 		function send_path(path) {
-	 			$$.post('/wel/',path);
-	 		}
-		// Only executed our code once the DOM is ready.
-
-	 		paths = [];
-
-			destWidth = 640.0;
-			destHeight = 640.0;
-			zoom = 1;
-			pixel_ratio = 1;
-
-
-	 		function maximise(view) {
-				console.log("window: x=" + window.innerWidth + " y=" + window.innerHeight);
-				var xr = (window.innerWidth-50) / destWidth;
-				var yr = (window.innerHeight-50) / destHeight;
-				zoom = Math.min(xr,yr);
-				console.log("before view: x="+view.viewSize.width+" y="+view.viewSize.height);
-				pixel_ratio = view.pixelRatio;
-				var canvas = document.getElementById('myCanvas');
-				view.viewSize.width = destWidth /pixel_ratio * zoom;
-				view.viewSize.height = destWidth /pixel_ratio * zoom;
-				console.log("after view: x="+view.viewSize.width+" y="+view.viewSize.height);
-				console.log("after canvas: x="+canvas.width+" y="+canvas.height);
-				// canvas.width = destWidth  * zoom;
-				// canvas.height = destHeight  * zoom;
-				// console.log(destHeight * zoom+ " " + canvas.height);
-				// console.log(destHeight * zoom+ " " + canvas.height);
-				//console.log(view.viewSize);
-				//console.log(pixel_ratio);
-
-
-	 		}
-
-	 		window.onresize = function(event) {
-				console.log("resize.view: x="+paper.view.viewSize.width+" y="+paper.view.viewSize.height);
-				console.log(event.target.innerWidth);
-				maximise(paper.view);
-
-	 		}
-
-			window.onload = function() {
-
-				// Get a reference to the canvas object
-				var canvas = document.getElementById('myCanvas');
-				// Create an empty project and a view for the canvas:
-				paper.setup(canvas);
+		// Get a reference to the canvas object
+		var canvas = document.getElementById('myCanvas');
+		// Create an empty project and a view for the canvas:
+		paper.setup(canvas);
 
 
 
-				with (paper) {
-					maximise(view);		
-					// Create a simple drawing tool:
-					var tool = new Tool();
-					var path;
+		with (paper) {
+			maximise(view);		
+			// Create a simple drawing tool:
+			var tool = new Tool();
+			var path;
 
-					// Define a mousedown and mousedrag handler
-					tool.onMouseDown = function(event) {
-						path = new Path();
-						color = [	Math.random()*0.5 + 0.5,
-									Math.random()*0.5 + 0.5,
-									Math.random()*0.5 + 0.5, 1]
-						path.strokeColor = color;
-						path.strokeWidth = 5*zoom,
-						p = event.point;
-						p.x /= pixel_ratio;
-						p.y /= pixel_ratio;
-						path.add(p);
-					}
-
-					tool.onMouseDrag = function(event) {
-						p = event.point;
-						p.x /= pixel_ratio;
-						p.y /= pixel_ratio;
-						path.add(p);
-					}
-
-					tool.onMouseUp = function(event) {
-						console.log("send path");
-						var data = {};
-						data['path'] = path.exportJSON();
-						data['zoom'] = zoom;
-						data['pixel_ratio'] = pixel_ratio;
-						paths.push(path);
-						//path.remove();
-						send_path(data);
-					}
-
-				    view.onFrame = function(event) {
-						// On each frame, rotate the path by 3 degrees:
-						for (p in paths) {
-							//console.log(paths[p].strokeColor);
-							t = paths[p].strokeColor.alpha;
-							t = t - 0.001;
-							//paths[p].strokeWidth = Math.random()*5+1;
-							//console.log(t);
-							if (t <= 0.0) {
-								paths[p].remove();
-								paths.splice(p,1);
-							} else {
-								paths[p].strokeColor.alpha = t;
-							}
-							
-						}
-						
-					}
-
-
-				}
+			// Define a mousedown and mousedrag handler
+			tool.onMouseDown = function(event) {
+				path = new Path();
+				color = [	Math.random()*0.5 + 0.5,
+							Math.random()*0.5 + 0.5,
+							Math.random()*0.5 + 0.5, 1]
+				path.strokeColor = color;
+				path.strokeWidth = 5*zoom,
+				p = event.point;
+				p.x /= pixel_ratio;
+				p.y /= pixel_ratio;
+				path.add(p);
 			}
-		</script>
+
+			tool.onMouseDrag = function(event) {
+				p = event.point;
+				p.x /= pixel_ratio;
+				p.y /= pixel_ratio;
+				path.add(p);
+			}
+
+			tool.onMouseUp = function(event) {
+				console.log("send path");
+				var data = {};
+				data['path'] = path.exportJSON();
+				data['zoom'] = zoom;
+				data['pixel_ratio'] = pixel_ratio;
+				paths.push(path);
+				//path.remove();
+				send_path(data);
+			}
+
+		    view.onFrame = function(event) {
+				// On each frame, rotate the path by 3 degrees:
+				for (p in paths) {
+					//console.log(paths[p].strokeColor);
+					t = paths[p].strokeColor.alpha;
+					t = t - $config.client_decay;
+
+					if (t <= 0.0) {
+						paths[p].remove();
+						paths.splice(p,1);
+					} else {
+						paths[p].strokeColor.alpha = t;
+					}
+					
+				}
+				
+			}
+
+
+		}
+	}
+</script>
