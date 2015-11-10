@@ -1,81 +1,107 @@
 $def with (data)
 
-$var title: WindowDraw.
+$var title: GraPHOtti.
 
+	<H3>GraPHOtti @ WestEndLights</H3>
+	<p style="color:#555555;">doodle below</p>
 	<canvas id="myCanvas" border="1" keepalive="true" width="600" height="600" resize="false" style="border:2px solid #555555;background: black;">
-</canvas>
+	</canvas>
+	<button onclick="exportPNG();">Tweet</button>
 
 	<script type="text/javascript">
 		function send_path(path) {
 			$$.post('/wel/',path);
 		}
 
-	window.onload = function() {
+	    function exportPNG(){
+			var canvas = document.getElementById('myCanvas');
 
-		// Get a reference to the canvas object
-		var canvas = document.getElementById('myCanvas');
-		// Create an empty project and a view for the canvas:
-		paper.setup(canvas);
+    	    canvas.toBlob(function(blob) { 
+				var fd = new FormData();
+				fd.append('fname', 'test.png');
+				fd.append('data', blob);
+				$$.ajax({
+				    type: 'POST',
+				    url: '/wel/tweet',
+				    data: fd,
+				    processData: false,
+				    contentType: false
+				}).done(function(data) {
+				       console.log(data);
+				});
+    	    });
+    	}
+
+		function tweet() {
+
+		}
+
+		window.onload = function() {
+
+			// Get a reference to the canvas object
+			var canvas = document.getElementById('myCanvas');
+			// Create an empty project and a view for the canvas:
+			paper.setup(canvas);
 
 
 
-		with (paper) {
-			maximise(view);		
-			// Create a simple drawing tool:
-			var tool = new Tool();
-			var path;
+			with (paper) {
+				maximise(view);		
+				// Create a simple drawing tool:
+				var tool = new Tool();
+				var path;
 
-			// Define a mousedown and mousedrag handler
-			tool.onMouseDown = function(event) {
-				path = new Path();
-				color = [	Math.random()*0.5 + 0.5,
-							Math.random()*0.5 + 0.5,
-							Math.random()*0.5 + 0.5, 1]
-				path.strokeColor = color;
-				path.strokeWidth = 5*zoom,
-				p = event.point;
-				p.x /= pixel_ratio;
-				p.y /= pixel_ratio;
-				path.add(p);
-			}
+				// Define a mousedown and mousedrag handler
+				tool.onMouseDown = function(event) {
+					path = new Path();
+					color = [	Math.random()*0.5 + 0.5,
+								Math.random()*0.5 + 0.5,
+								Math.random()*0.5 + 0.5, 1]
+					path.strokeColor = color;
+					path.strokeWidth = 5*zoom,
+					p = event.point;
+					p.x /= pixel_ratio;
+					p.y /= pixel_ratio;
+					path.add(p);
+				}
 
-			tool.onMouseDrag = function(event) {
-				p = event.point;
-				p.x /= pixel_ratio;
-				p.y /= pixel_ratio;
-				path.add(p);
-			}
+				tool.onMouseDrag = function(event) {
+					p = event.point;
+					p.x /= pixel_ratio;
+					p.y /= pixel_ratio;
+					path.add(p);
+				}
 
-			tool.onMouseUp = function(event) {
-				console.log("send path");
-				var data = {};
-				data['path'] = path.exportJSON();
-				data['zoom'] = zoom;
-				data['pixel_ratio'] = pixel_ratio;
-				paths.push(path);
-				//path.remove();
-				send_path(data);
-			}
+				tool.onMouseUp = function(event) {
+					console.log("send path");
+					var data = {};
+					data['path'] = path.exportJSON();
+					data['zoom'] = zoom;
+					data['pixel_ratio'] = pixel_ratio;
+					paths.push(path);
+					//path.remove();
+					send_path(data);
+				}
 
-		    view.onFrame = function(event) {
-				// On each frame, rotate the path by 3 degrees:
-				for (p in paths) {
-					//console.log(paths[p].strokeColor);
-					t = paths[p].strokeColor.alpha;
-					t = t - $config.client_decay;
+			    view.onFrame = function(event) {
+					// On each frame, rotate the path by 3 degrees:
+					for (p in paths) {
+						//console.log(paths[p].strokeColor);
+						t = paths[p].strokeColor.alpha;
+						t = t - $config.client_decay;
 
-					if (t <= 0.0) {
-						paths[p].remove();
-						paths.splice(p,1);
-					} else {
-						paths[p].strokeColor.alpha = t;
+						if (t <= 0.0) {
+							paths[p].remove();
+							paths.splice(p,1);
+						} else {
+							paths[p].strokeColor.alpha = t;
+						}
+						
 					}
 					
 				}
-				
+
+
 			}
-
-
 		}
-	}
 </script>

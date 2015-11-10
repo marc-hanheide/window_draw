@@ -15,6 +15,7 @@ web.config.debug = False
 
 urls = (
     '/wel/', 'index',
+    '/wel/tweet', 'tweet',
     '/wel/sse', 'SSEServer',
     '/wel/view', 'view',
 )
@@ -85,6 +86,15 @@ class view:
         return renderer.view(config.config)
 
 
+### Renderers for actual interface:
+class tweet:
+    def POST(self):
+        i = web.input()
+        with open(i['fname'], 'w') as f:
+            f.write(i['data'])
+        return web.ok()
+
+
 class SSEServer:
 
     def response(self, data):
@@ -105,10 +115,7 @@ class SSEServer:
             finally:
                 new_path_cond.release()
             block = True
-            if e is not None:
-                r = self.response(str(e))
-            else:
-                r = self.response(str(e))
+            r = self.response(str(e))
             yield r
 
 
