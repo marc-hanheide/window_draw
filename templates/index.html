@@ -2,11 +2,102 @@ $def with (data)
 
 $var title: GraPHOtti.
 
-	<H3>GraPHOtti @ WestEndLights</H3>
-	<p style="color:#555555;">doodle below</p>
-	<canvas id="myCanvas" border="1" keepalive="true" width="600" height="600" resize="false" style="border:2px solid #555555;background: black;">
-	</canvas>
-	<button onclick="tweet();">Tweet</button>
+<!-- 		<nav class="navbar navbar-default">
+		  	<div class="container-fluid">
+	    		<div class="navbar-header">
+	      			<div class="navbar-brand">
+	        			GraPHOtti @ WestEndLights
+
+	      			</div>
+
+	    		</div>
+	  		</div>
+		</nav>
+ -->	
+		<ul class="nav nav-tabs">
+		  <li role="presentation" class="active"><a href="#draw">Doodle</a></li>
+		  <li role="presentation"><a href="#about">About</a></li>
+		  <li role="presentation"><a href="#share">Share</a></li>
+		</ul>
+
+		<div class="jumbotron">
+		  <div class="container">
+		  	<h1>GraPHOtti: Graffiti on your PHOne</h1>
+		  	<p>A collaborative, digital Graffiti experience</p>
+		    <p><a href="#draw">Draw</a> on our bay window together, <br/><a href="#share">Share</a> your art, <br/>enjoy collaborative creativity.</p>
+		  </div>
+		</div>
+
+ 		<div class="container">
+			<div class="row">
+				<div class="panel panel-default">
+				  	<div class="panel-heading">
+						<a name="draw" ></a>
+				    	<h3 class="panel-title">Doodle here</h3>
+				  	</div>
+				  	<div class="panel-body">
+						<a name="draw" />
+						<canvas id="myCanvas" border="1" keepalive="true" width="600" height="600" resize="false" style="border:2px solid #555555;background: black;">
+						</canvas>
+					</div>				
+				</div>
+			</div>
+
+
+			<div class="row">
+				<div class="panel panel-default">
+				  	<div class="panel-heading">
+						<a name="about"></a>
+				    	<h3 class="panel-title">About</h3>
+				  	</div>
+				  	<div class="panel-body">
+				  		This is GraPHOtti...
+					</div>				
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="panel panel-default">
+				  	<div class="panel-heading">
+				    	<h3 class="panel-title">Share</h3>
+				    	Share on Twitter and follow posts from others at <a href="https://twitter.com/graPH0tti">https://twitter.com/graPH0tti</a>.
+				  	</div>
+				  	<div class="panel-body">
+						<a name="share"></a>
+
+				  		<a href="https://twitter.com/graPH0tti" class="twitter-follow-button" data-show-count="false" data-size="large" data-dnt="true">Follow @graPH0tti</a>
+						<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+						<a href="https://twitter.com/intent/tweet?screen_name=graPH0tti&text=%23westendlights" class="twitter-mention-button" data-size="large" data-related="graPH0tti,WestEndLights" data-dnt="true">Tweet to @graPH0tti</a>
+						<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+						<button type="button" class="btn btn-primary btn-block" onclick="tweet();">Tweet current doodle on @graPH0tti</button>
+
+
+					</div>
+					<div class="panel-body">
+						<a class="twitter-timeline" data-dnt="true" href="https://twitter.com/graPH0tti" data-widget-id="664420268740354048">Tweets by @graPH0tti</a>
+						<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>				
+
+					</div>
+				</div>
+
+			</div>
+
+		</div>
+
+
+	    <footer class="footer">
+      		<div class="container">
+      			<small>
+        			<p class="text-muted">GraPHOtti, &copy; Marc Hanheide 2015, <br/><a href="https://github.com/marc-hanheide/window_draw">https://github.com/marc-hanheide/window_draw</a></p>
+    			</small>
+      		</div>
+    	</footer>
+
+
+
+
 
 	<script type="text/javascript">
 		function send_path(path) {

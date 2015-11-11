@@ -14,7 +14,6 @@ from StringIO import StringIO
 import config
 
 
-web.config.debug = False
 
 
 urls = (
@@ -117,13 +116,14 @@ class WindowDrawApp(web.application):
 if __name__ == '__main__':
     app = WindowDrawApp(urls, globals())
 else:
+    web.config.debug = False
     app = web.application(urls, globals(), autoreload=False)
 
-session = web.session.Session(app,
-                              web.session.DiskStore('sessions'),
-                              initializer={'count': 0})
+# session = web.session.Session(app,
+#                               web.session.DiskStore('sessions'),
+#                               initializer={'count': 0})
 
-web.config.session_parameters['timeout'] = 3600
+# web.config.session_parameters['timeout'] = 3600
 
 new_path_cond = Condition()
 current_path = dumps({'path': [],
@@ -136,11 +136,11 @@ last_snapshot = None
 ### Renderers for actual interface:
 class index:
     def GET(self):
-        session.count += 1
-        session.env = {}
-        for (k, v) in web.ctx.env.items():
-            if type(v) is str:
-                session.env[k] = v
+        # session.count += 1
+        # session.env = {}
+        # for (k, v) in web.ctx.env.items():
+        #     if type(v) is str:
+        #         session.env[k] = v
         return renderer.index(config.config)
 
     def POST(self):
