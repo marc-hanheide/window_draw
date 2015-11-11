@@ -37,6 +37,8 @@ $var title: GraPHOtti.
 				  	</div>
 				  	<div class="panel-body">
 						<a name="draw"></a>
+						<button type="button" class="btn btn-success btn-block" onclick="fullscreen_canvas();">Go fullscreen!</button>
+
 						<canvas id="myCanvas" border="1" keepalive="true" width="600" height="600" resize="false" style="border:2px solid #555555;background: black;">
 						</canvas>
 					</div>				
@@ -111,6 +113,19 @@ $var title: GraPHOtti.
 
 
 	<script type="text/javascript">
+
+		function fullscreen_canvas() {
+            var el = document.getElementById('myCanvas');
+ 
+            if(el.webkitRequestFullScreen) {
+               el.webkitRequestFullScreen();
+            }
+            else {
+              el.mozRequestFullScreen();
+            }            
+		}
+
+
 		function send_path(path) {
 			$$.post('#', path).fail(function() {
     			alert( "you are not allowed to draw from where you are!" );
@@ -139,8 +154,18 @@ $var title: GraPHOtti.
 				var tool = new Tool();
 				var path;
 
+				geo_wait_text = new PointText(new Point(20, 20));
+				geo_wait_text.justification = 'left';
+				geo_wait_text.fillColor = 'red';
+				geo_wait_text.fontSize = 24;
+				geo_wait_text.content = 'Waiting to be localised\nbefore painting is allowed';
+				
+
+
 				// Define a mousedown and mousedrag handler
 				tool.onMouseDown = function(event) {
+					if (latitude == 0.0  && longitude == 0.0)
+						return;
 					path = new Path();
 					color = [	Math.random()*0.5 + 0.5,
 								Math.random()*0.5 + 0.5,
@@ -154,6 +179,8 @@ $var title: GraPHOtti.
 				}
 
 				tool.onMouseDrag = function(event) {
+					if (latitude == 0.0  && longitude == 0.0)
+						return;
 					p = event.point;
 					p.x /= pixel_ratio;
 					p.y /= pixel_ratio;
@@ -161,7 +188,8 @@ $var title: GraPHOtti.
 				}
 
 				tool.onMouseUp = function(event) {
-					console.log("send path");
+					if (latitude == 0.0  && longitude == 0.0)
+						return;
 					var data = {};
 					data['path'] = path.exportJSON();
 					data['zoom'] = zoom;
@@ -175,6 +203,11 @@ $var title: GraPHOtti.
 
 			    view.onFrame = function(event) {
 					// On each frame, rotate the path by 3 degrees:
+					if (geo_wait_text && latitude != 0.0 && longitude != 0.0) {
+						geo_wait_text.remove();
+						geo_wait_text = null;
+					}
+
 					for (p in paths) {
 						//console.log(paths[p].strokeColor);
 						t = paths[p].strokeColor.alpha;

@@ -29,6 +29,18 @@ $var title: WindowDraw.
 	    }, "image/jpeg");
 	}
 
+	function fullscreen(eid){
+	           var el = document.getElementById('drawCanvas');
+	 
+	           if(el.webkitRequestFullScreen) {
+	               el.webkitRequestFullScreen();
+	           }
+	          else {
+	             el.mozRequestFullScreen();
+	          }            
+	}
+ 
+
 
 	window.onload = function() {
 
@@ -36,6 +48,20 @@ $var title: WindowDraw.
 
 		// Get a reference to the canvas object
 		var canvas = document.getElementById('drawCanvas');
+		canvas.addEventListener("click",function () {
+            var el = document.getElementById('drawCanvas');
+ 
+            if(el.webkitRequestFullScreen) {
+               el.webkitRequestFullScreen();
+            }
+            else {
+              el.mozRequestFullScreen();
+            }            
+		});
+
+
+
+
 		// var destWidth = 640;
 		// var destHeight = 480;
 		// var xr = (window.innerWidth-10) / destWidth;

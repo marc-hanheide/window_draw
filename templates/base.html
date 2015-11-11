@@ -75,8 +75,8 @@ $def with (page, vars=None)
 
 	 		function maximise(view, canvas_id) {
 				console.log("window: x=" + window.innerWidth + " y=" + window.innerHeight);
-				var xr = (window.innerWidth-50) / destWidth;
-				var yr = (window.innerHeight-50) / destHeight;
+				var xr = (window.innerWidth-100) / destWidth;
+				var yr = (window.innerHeight-100) / destHeight;
 				zoom = Math.min(xr,yr);
 				console.log("before view: x="+view.viewSize.width+" y="+view.viewSize.height);
 				pixel_ratio = view.pixelRatio;
