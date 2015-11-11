@@ -1,4 +1,11 @@
-#from flask import Flask, render_template, request, jsonify, Blueprint
+import sys
+import os
+abspath = os.path.dirname(__file__)
+print abspath
+
+if len(abspath) > 0:
+    sys.path.append(abspath)
+    os.chdir(abspath)
 
 import web
 import signal
@@ -20,11 +27,11 @@ from geopy.distance import vincenty
 
 
 urls = (
-    '/wel/', 'index',
-    '/wel/image_store', 'image_store',
-    '/wel/tweet', 'tweet',
-    '/wel/sse', 'SSEServer',
-    '/wel/view', 'view',
+    '/', 'index',
+    '/image_store', 'image_store',
+    '/tweet', 'tweet',
+    '/sse', 'SSEServer',
+    '/view', 'view',
 )
 
 renderer = web.template.render('templates', base="base", globals=globals())
@@ -229,7 +236,7 @@ class image_store:
     def POST(self):
         global last_snapshot
         i = web.input()
-        fname = 'graphotti_%s.jpg' % str(datetime.now())
+        fname = abspath + '/images/graphotti_%s.jpg' % str(datetime.now())
         with open(fname, 'w') as f:
             f.write(i['data'])
         last_snapshot = {

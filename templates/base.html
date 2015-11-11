@@ -33,6 +33,7 @@ $def with (page, vars=None)
 			    var img_url = "http://maps.googleapis.com/maps/api/staticmap?center="+latlon+"&zoom=12&size=400x300&sensor=false&markers=size:mid%7Ccolor:0xff0000%7C"+latlon;
 
 			    document.getElementById(mapholder_div).innerHTML = "<img src='"+img_url+"'>";
+			    document.getElementById("myCanvas").hidden = false;
 			}
 
 			function getLocation() {

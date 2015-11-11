@@ -17,7 +17,7 @@ $var title: WindowDraw.
 			fd.append('data', blob);
 			$$.ajax({
 			    type: 'POST',
-			    url: '/wel/image_store',
+			    url: 'image_store',
 			    data: fd,
 			    processData: false,
 			    contentType: false
@@ -46,7 +46,7 @@ $var title: WindowDraw.
 		paper.setup(canvas);
 		with (paper) {
 			maximise(view);
-			var source = new EventSource("/wel/sse");
+			var source = new EventSource("sse");
 			// text = new PointText(new Point(20, 20));
 			// text.justification = 'left';
 			// text.fillColor = 'green';
