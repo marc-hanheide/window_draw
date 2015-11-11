@@ -6,34 +6,15 @@ $var title: GraPHOtti.
 	<p style="color:#555555;">doodle below</p>
 	<canvas id="myCanvas" border="1" keepalive="true" width="600" height="600" resize="false" style="border:2px solid #555555;background: black;">
 	</canvas>
-	<button onclick="exportPNG();">Tweet</button>
+	<button onclick="tweet();">Tweet</button>
 
 	<script type="text/javascript">
 		function send_path(path) {
-			$$.post('/wel/',path);
+			$$.post('/wel/', path);
 		}
 
-	    function exportPNG(){
-			var canvas = document.getElementById('myCanvas');
-
-    	    canvas.toBlob(function(blob) { 
-				var fd = new FormData();
-				fd.append('fname', 'test.png');
-				fd.append('data', blob);
-				$$.ajax({
-				    type: 'POST',
-				    url: '/wel/tweet',
-				    data: fd,
-				    processData: false,
-				    contentType: false
-				}).done(function(data) {
-				       console.log(data);
-				});
-    	    });
-    	}
-
 		function tweet() {
-
+			$$.post('/wel/tweet', {});
 		}
 
 		window.onload = function() {

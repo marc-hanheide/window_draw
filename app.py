@@ -7,8 +7,9 @@ from json import loads
 import sys
 from threading import Condition
 from os import _exit
-
+from datetime import datetime
 from twython import Twython, TwythonError
+from StringIO import StringIO
 
 import config
 
@@ -18,6 +19,7 @@ web.config.debug = False
 
 urls = (
     '/wel/', 'index',
+    '/wel/image_store', 'image_store',
     '/wel/tweet', 'tweet',
     '/wel/sse', 'SSEServer',
     '/wel/view', 'view',
@@ -62,7 +64,7 @@ class Tweeter():
         else:
             print "tweet of more than 140 chars not allowed"
 
-    def tweet_photo(self, text, photo_path):
+    def tweet_photo_url(self, text, photo_path):
         if self._twitter is None:
             return
 
@@ -73,6 +75,30 @@ class Tweeter():
             try:
                 photo = open(photo_path, 'rb')
                 self._twitter.update_status_with_media(status=text, media=photo)
+            except TwythonError as e:
+                print e
+        else:
+            print "tweet of more than 140 chars not allowed"
+
+    def tweet_photo(self, text, blob):
+        if self._twitter is None:
+            return
+
+        nchar = len(text)
+
+        print "Tweeting %s with photo ... (%d)" % (text, nchar)
+        if nchar < 140:
+            image_io = StringIO()
+            image_io.write(blob)
+            image_io.seek(0)
+
+            try:
+                print type(blob)
+                response = self._twitter.upload_media(media=image_io)
+                print response
+                response = self._twitter.update_status(
+                    status=text,
+                    media_ids=[response['media_id']])
             except TwythonError as e:
                 print e
         else:
@@ -104,6 +130,8 @@ current_path = dumps({'path': [],
                      'dummy': range(1, 2048),  # data to stop proxy buffering
                       })
 
+last_snapshot = None
+
 
 ### Renderers for actual interface:
 class index:
@@ -126,8 +154,13 @@ class index:
             s[1] /= (zoom / pixel_ratio)
         new_path_cond.acquire()
         try:
+            env = {}
+            for (k, v) in web.ctx.env.items():
+                if type(v) is str:
+                    env[k] = v
             d = {
                 'path': p,
+                'env': env,
                 'dummy': range(1, 2048),  # dummy data to stop proxy buffering
             }
             current_path = dumps(d)
@@ -143,12 +176,27 @@ class view:
         return renderer.view(config.config)
 
 
-### Renderers for actual interface:
 class tweet:
     def POST(self):
         i = web.input()
-        with open(i['fname'], 'w') as f:
+        if last_snapshot is not None:
+            tweeter.tweet_photo(str(datetime.now()), last_snapshot['blob'])
+            #tweeter.tweet('test')
+        print i
+        return web.ok()
+
+
+class image_store:
+    def POST(self):
+        global last_snapshot
+        i = web.input()
+        fname = 'graphotti_%s.jpg' % str(datetime.now())
+        with open(fname, 'w') as f:
             f.write(i['data'])
+        last_snapshot = {
+            'fname': fname,
+            'blob': i['data']
+        }
         return web.ok()
 
 

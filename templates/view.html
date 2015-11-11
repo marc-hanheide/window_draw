@@ -7,6 +7,27 @@ $var title: WindowDraw.
 </canvas>
 
 	<script type="text/javascript">
+
+    function store_bitmap(){
+		var canvas = document.getElementById('drawCanvas');
+
+	    canvas.toBlob(function(blob) { 
+			var fd = new FormData();
+			fd.append('fname', 'test.jpg');
+			fd.append('data', blob);
+			$$.ajax({
+			    type: 'POST',
+			    url: '/wel/image_store',
+			    data: fd,
+			    processData: false,
+			    contentType: false
+			}).done(function(data) {
+			       console.log(data);
+			});
+	    }, "image/jpeg");
+	}
+
+
 	window.onload = function() {
 
 		// Get a reference to the canvas object
@@ -42,6 +63,7 @@ $var title: WindowDraw.
 			    path.strokeWidth = 5*zoom,
 			    paths.push(path);
 			    view.draw();
+			    store_bitmap();
 
 			};
 			
