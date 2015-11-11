@@ -36,13 +36,24 @@ $var title: GraPHOtti.
 				    	<h3 class="panel-title">Doodle here</h3>
 				  	</div>
 				  	<div class="panel-body">
-						<a name="draw" />
+						<a name="draw"></a>
 						<canvas id="myCanvas" border="1" keepalive="true" width="600" height="600" resize="false" style="border:2px solid #555555;background: black;">
 						</canvas>
 					</div>				
 				</div>
 			</div>
 
+
+			<div class="row">
+				<div class="panel panel-default">
+				  	<div class="panel-heading">
+				    	<h3 class="panel-title">Where you are</h3>
+				  	</div>
+				  	<div class="panel-body">
+				  		<div id="mapholder"><H2>GraPHOtti needs to know your location to make sure you are close to our Window.</H2></div>
+					</div>				
+				</div>
+			</div>
 
 			<div class="row">
 				<div class="panel panel-default">
@@ -101,7 +112,9 @@ $var title: GraPHOtti.
 
 	<script type="text/javascript">
 		function send_path(path) {
-			$$.post('/wel/', path);
+			$$.post('/wel/', path).fail(function() {
+    			alert( "you are not allowed to draw from where you are!" );
+  			});
 		}
 
 		function tweet() {
@@ -109,6 +122,9 @@ $var title: GraPHOtti.
 		}
 
 		window.onload = function() {
+
+			getLocation();
+
 
 			// Get a reference to the canvas object
 			var canvas = document.getElementById('myCanvas');
@@ -149,6 +165,8 @@ $var title: GraPHOtti.
 					var data = {};
 					data['path'] = path.exportJSON();
 					data['zoom'] = zoom;
+					data['latitude'] = latitude;
+					data['longitude'] = longitude;
 					data['pixel_ratio'] = pixel_ratio;
 					paths.push(path);
 					//path.remove();

@@ -13,6 +13,9 @@ from StringIO import StringIO
 
 import config
 
+from geopy.geocoders import Nominatim
+from geopy.distance import vincenty
+
 
 
 
@@ -27,6 +30,28 @@ urls = (
 renderer = web.template.render('templates', base="base", globals=globals())
 
 is_running = True
+
+
+class Geofence():
+
+    def __init__(self):
+        geolocator = Nominatim()
+        self.location = geolocator.geocode(config.location)
+        print self.location.address
+        print self.location.latitude, self.location.longitude
+        self.max_distance = config.max_distance
+
+    def distance(self, location):
+        if location is None:
+            return float('inf')
+        else:
+            latlong_home = (self.location.latitude, self.location.longitude)
+            return vincenty(latlong_home, location).km
+
+    def valid_position(self, location):
+        d = self.distance(location)
+        print "distance: %f" % d
+        return d < self.max_distance
 
 
 class Tweeter():
@@ -148,6 +173,20 @@ class index:
         i = web.input()
         p = loads(i['path'])
         zoom = float(i['zoom'])
+        if 'latitude' in i:
+            latitude = float(i['latitude'])
+        else:
+            latitude = 0.0
+        if 'longitude' in i:
+            longitude = float(i['longitude'])
+        else:
+            longitude = 0.0
+
+        geo_location = (latitude, longitude)
+
+        if not geo_fence.valid_position(geo_location):
+            return web.notacceptable()
+
         pixel_ratio = float(i['pixel_ratio'])
         for s in p[1]['segments']:
             s[0] /= (zoom / pixel_ratio)
@@ -226,6 +265,8 @@ class SSEServer:
 
 def signal_handler(signum, frame):
     _exit(signal.SIGTERM)
+
+geo_fence = Geofence()
 
 
 if __name__ == '__main__':

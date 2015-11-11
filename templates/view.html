@@ -30,6 +30,8 @@ $var title: WindowDraw.
 
 	window.onload = function() {
 
+		decay_factor = 1.0;
+
 		// Get a reference to the canvas object
 		var canvas = document.getElementById('drawCanvas');
 		// var destWidth = 640;
@@ -64,17 +66,20 @@ $var title: WindowDraw.
 			    paths.push(path);
 			    view.draw();
 			    store_bitmap();
-
 			};
 			
 		    view.onFrame = function(event) {
-				// On each frame, rotate the path by 3 degrees:
-				for (p in paths) {
-					//console.log(paths[p].strokeColor);
-					t = paths[p].strokeColor.alpha;
-					t = t - $config.server_decay;
+		    	var max_t = 0;
+				for (var p in paths) {
+					if (paths[p].strokeColor.alpha > max_t)
+						max_t = paths[p].strokeColor.alpha;
+				}
+				for (var p in paths) {
+					var t = paths[p].strokeColor.alpha;
+					if (max_t >=0.5)
+						t = t - ($config.server_decay * decay_factor);
 					//paths[p].strokeWidth = Math.random()*5+1;
-					for (s in paths[p].segments) {
+					for (var s in paths[p].segments) {
 						paths[p].segments[s].point.x +=  (Math.random()-0.5) 
 							* $config.server_jitter;
 						paths[p].segments[s].point.y +=  (Math.random()-0.5) 

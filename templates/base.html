@@ -23,6 +23,54 @@ $def with (page, vars=None)
 			destHeight = $config.config['height'];
 			zoom = 1;
 			pixel_ratio = 1;
+			latitude = 0.0;
+			longitude = 0.0;
+
+
+			function showPosition(mapholder_div, latitude, longitude) {
+			    var latlon = latitude + "," + longitude;
+
+			    var img_url = "http://maps.googleapis.com/maps/api/staticmap?center="+latlon+"&zoom=12&size=400x300&sensor=false&markers=size:mid%7Ccolor:0xff0000%7C"+latlon;
+
+			    document.getElementById(mapholder_div).innerHTML = "<img src='"+img_url+"'>";
+			}
+
+			function getLocation() {
+			    if (navigator.geolocation) {
+			        navigator.geolocation.getCurrentPosition(
+			        	function(position) {
+				        	latitude = position.coords.latitude;
+				        	longitude = position.coords.longitude;
+				        	showPosition("mapholder", latitude, longitude)
+				        	console.log(position);
+			        	},
+			        	function(error) {
+						    switch(error.code) {
+						        case error.PERMISSION_DENIED:
+						            console.log("User denied the request for Geolocation.");
+						            break;
+						        case error.POSITION_UNAVAILABLE:
+						            console.log("Location information is unavailable.");
+						            break;
+						        case error.TIMEOUT:
+						            console.log("The request to get user location timed out.");
+						            break;
+						        case error.UNKNOWN_ERROR:
+						            console.log("An unknown error occurred.");
+						            break;
+						    }
+						    $$.getJSON("https://freegeoip.net/json/", function(res){
+						    	console.log("estimated from freegeoip " + res.latitude + " " + res.longitude);
+						        latitude = res.latitude;
+						        longitude = res.longitude;
+						        showPosition("mapholder", latitude, longitude)
+   						    });
+
+						});
+			    } else {
+			        console.log("Geolocation is not supported by this browser.");
+			    }
+			}
 
 	 		function maximise(view) {
 				console.log("window: x=" + window.innerWidth + " y=" + window.innerHeight);
