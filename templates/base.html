@@ -73,14 +73,14 @@ $def with (page, vars=None)
 			    }
 			}
 
-	 		function maximise(view) {
+	 		function maximise(view, canvas_id) {
 				console.log("window: x=" + window.innerWidth + " y=" + window.innerHeight);
 				var xr = (window.innerWidth-50) / destWidth;
 				var yr = (window.innerHeight-50) / destHeight;
 				zoom = Math.min(xr,yr);
 				console.log("before view: x="+view.viewSize.width+" y="+view.viewSize.height);
 				pixel_ratio = view.pixelRatio;
-				var canvas = document.getElementById('myCanvas');
+				var canvas = document.getElementById(canvas_id);
 				view.viewSize.width = destWidth /pixel_ratio * zoom;
 				view.viewSize.height = destHeight /pixel_ratio * zoom;
 				console.log("after view: x="+view.viewSize.width+" y="+view.viewSize.height);
