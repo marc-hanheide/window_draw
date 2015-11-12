@@ -14,6 +14,6 @@ config = {
     'height': 1400
 }
 
-location = "10 Queens Crescent, LN1 1LR, Lincoln, UK"
+location = (53.2329633, -0.5457987)
 # maximal 10km away
 max_distance = 10

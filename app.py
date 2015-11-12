@@ -43,18 +43,14 @@ is_running = True
 class Geofence():
 
     def __init__(self):
-        geolocator = Nominatim()
-        self.location = geolocator.geocode(config.location)
-        print self.location.address
-        print self.location.latitude, self.location.longitude
+        self.location = config.location
         self.max_distance = config.max_distance
 
     def distance(self, location):
         if location is None:
             return float('inf')
         else:
-            latlong_home = (self.location.latitude, self.location.longitude)
-            return vincenty(latlong_home, location).km
+            return vincenty(self.location, location).km
 
     def valid_position(self, location):
         d = self.distance(location)
