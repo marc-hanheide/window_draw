@@ -2,3 +2,4 @@
 /sessions
 /twitter_config.json
 *.pyc
+/images
