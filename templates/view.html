@@ -2,7 +2,7 @@ $def with (data)
 
 $var title: WindowDraw.
 
-<canvas id="drawCanvas" keepalive="true" resize="true" style="border:1px solid #666666;background: black;">
+<canvas id="myCanvas" keepalive="true" resize="true" style="border:1px solid #666666;background: black;">
 	
 </canvas>
 <p/>
@@ -11,7 +11,7 @@ $var title: WindowDraw.
 	<script type="text/javascript">
 
     function store_bitmap(){
-		var canvas = document.getElementById('drawCanvas');
+		var canvas = document.getElementById('myCanvas');
 
 	    canvas.toBlob(function(blob) { 
 			var fd = new FormData();
@@ -30,7 +30,7 @@ $var title: WindowDraw.
 	}
 
 	function fullscreen(eid){
-	           var el = document.getElementById('drawCanvas');
+	           var el = document.getElementById('myCanvas');
 	 
 	           if(el.webkitRequestFullScreen) {
 	               el.webkitRequestFullScreen();
@@ -47,9 +47,9 @@ $var title: WindowDraw.
 		decay_factor = 1.0;
 
 		// Get a reference to the canvas object
-		var canvas = document.getElementById('drawCanvas');
+		var canvas = document.getElementById('myCanvas');
 		canvas.addEventListener("click",function () {
-            var el = document.getElementById('drawCanvas');
+            var el = document.getElementById('myCanvas');
  
             if(el.webkitRequestFullScreen) {
                el.webkitRequestFullScreen();
@@ -73,7 +73,7 @@ $var title: WindowDraw.
 		// Create an empty project and a view for the canvas:
 		paper.setup(canvas);
 		with (paper) {
-			maximise(view, "drawCanvas");
+			maximise(view, "myCanvas");
 			var source = new EventSource("sse");
 			// text = new PointText(new Point(20, 20));
 			// text.justification = 'left';

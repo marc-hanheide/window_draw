@@ -11,7 +11,7 @@ server_jitter = 0.1
 
 config = {
     'width': 1200,
-    'height': 1600
+    'height': 1400
 }
 
 location = "10 Queens Crescent, LN1 1LR, Lincoln, UK"

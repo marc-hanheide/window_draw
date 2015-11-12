@@ -194,10 +194,10 @@ class index:
         if not geo_fence.valid_position(geo_location):
             return web.notacceptable()
 
-        pixel_ratio = float(i['pixel_ratio'])
+        #pixel_ratio = float(i['pixel_ratio'])
         for s in p[1]['segments']:
-            s[0] /= (zoom / pixel_ratio)
-            s[1] /= (zoom / pixel_ratio)
+            s[0] /= (zoom)
+            s[1] /= (zoom)
         new_path_cond.acquire()
         try:
             env = {}

@@ -28,6 +28,13 @@ $var title: GraPHOtti.
 		  </div>
 		</div>
 
+
+		<style>
+			canvas[resize] {
+ 			   width: 100%;
+    			height: 100%;
+			}
+		</style>
  		<div class="container">
 			<div class="row">
 				<div class="panel panel-default">
@@ -39,13 +46,11 @@ $var title: GraPHOtti.
 						<a name="draw"></a>
 						<button type="button" class="btn btn-success btn-block" onclick="fullscreen_canvas();">Go fullscreen!</button>
 
-						<canvas id="myCanvas" border="1" keepalive="true" width="600" height="600" resize="false" style="border:2px solid #555555;background: black;">
+						<canvas id="myCanvas" border="1" keepalive="true" resize="true" style="border:2px solid #555555;background: black;">
 						</canvas>
 					</div>				
 				</div>
 			</div>
-
-
 			<div class="row">
 				<div class="panel panel-default">
 				  	<div class="panel-heading">
@@ -149,7 +154,6 @@ $var title: GraPHOtti.
 
 
 			with (paper) {
-				maximise(view, "myCanvas");		
 				// Create a simple drawing tool:
 				var tool = new Tool();
 				var path;
@@ -173,8 +177,8 @@ $var title: GraPHOtti.
 					path.strokeColor = color;
 					path.strokeWidth = 5*zoom,
 					p = event.point;
-					p.x /= pixel_ratio;
-					p.y /= pixel_ratio;
+					// p.x /= pixel_ratio;
+					// p.y /= pixel_ratio;
 					path.add(p);
 				}
 
@@ -182,8 +186,8 @@ $var title: GraPHOtti.
 					if (latitude == 0.0  && longitude == 0.0)
 						return;
 					p = event.point;
-					p.x /= pixel_ratio;
-					p.y /= pixel_ratio;
+					// p.x /= pixel_ratio;
+					// p.y /= pixel_ratio;
 					path.add(p);
 				}
 
@@ -223,6 +227,9 @@ $var title: GraPHOtti.
 					}
 					
 				}
+
+				maximise(view, "myCanvas");		
+
 
 
 			}

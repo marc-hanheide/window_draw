@@ -30,9 +30,9 @@ $def with (page, vars=None)
 			function showPosition(mapholder_div, latitude, longitude) {
 			    var latlon = latitude + "," + longitude;
 
-			    var img_url = "http://maps.googleapis.com/maps/api/staticmap?center="+latlon+"&zoom=12&size=400x300&sensor=false&markers=size:mid%7Ccolor:0xff0000%7C"+latlon;
+			    var img_url = "http://maps.googleapis.com/maps/api/staticmap?center="+latlon+"&zoom=12&size=800x800&sensor=false&markers=size:mid%7Ccolor:0xff0000%7C"+latlon;
 
-			    document.getElementById(mapholder_div).innerHTML = "<img src='"+img_url+"'>";
+			    document.getElementById(mapholder_div).innerHTML = "<img width=\"100%\" src='"+img_url+"'>";
 			    document.getElementById("myCanvas").hidden = false;
 			}
 
@@ -75,18 +75,26 @@ $def with (page, vars=None)
 
 	 		function maximise(view, canvas_id) {
 				console.log("window: x=" + window.innerWidth + " y=" + window.innerHeight);
-				var xr = (window.innerWidth-100) / destWidth;
-				var yr = (window.innerHeight-100) / destHeight;
+				var canvas = document.getElementById(canvas_id);
+				pw = canvas.parentNode.clientWidth;
+				ph = canvas.parentNode.clientHeight;
+				var xr = (pw-30) / destWidth;
+				var yr = (window.innerHeight-50) / destHeight;
 				zoom = Math.min(xr,yr);
+
 				console.log("before view: x="+view.viewSize.width+" y="+view.viewSize.height);
+				console.log("before client: x="+canvas.clientWidth+" y="+canvas.clientHeight);
 				pixel_ratio = view.pixelRatio;
 				console.log("pixel_ratio: " + pixel_ratio);
-				var canvas = document.getElementById(canvas_id);
-				view.viewSize.width = destWidth /pixel_ratio * zoom;
-				view.viewSize.height = destHeight /pixel_ratio * zoom;
+
+				$$("#" + canvas_id).css("width", (destWidth  * zoom).toString());
+				$$("#" + canvas_id).css("height", (destHeight  * zoom).toString());
+
+				view.setViewSize(destWidth  * zoom, destHeight * zoom)
+				$$("#" + canvas_id).css("width", (destWidth  * zoom).toString());
+				$$("#" + canvas_id).css("height", (destHeight  * zoom).toString());
 				console.log("after view: x="+view.viewSize.width+" y="+view.viewSize.height);
 				//canvas.width = destWidth  * zoom;
-				//canvas.height = destHeight  * zoom;
 				// console.log(destHeight * zoom+ " " + canvas.height);
 				// console.log(destHeight * zoom+ " " + canvas.height);
 				//console.log(view.viewSize);
@@ -98,7 +106,7 @@ $def with (page, vars=None)
 	 		window.onresize = function(event) {
 				console.log("resize.view: x="+paper.view.viewSize.width+" y="+paper.view.viewSize.height);
 				console.log(event.target.innerWidth);
-				maximise(paper.view);
+				maximise(paper.view, "myCanvas");
 
 	 		}
 
