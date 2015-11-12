@@ -32,6 +32,7 @@ urls = (
     '/tweet', 'tweet',
     '/sse', 'SSEServer',
     '/view', 'view',
+    '/about', 'about'
 )
 
 renderer = web.template.render('templates', base="base", globals=globals())
@@ -220,6 +221,11 @@ class index:
 class view:
     def GET(self):
         return renderer.view(config.config)
+
+### Renderers for actual interface:
+class about:
+    def GET(self):
+        return renderer.about(config.config)
 
 
 class tweet:
