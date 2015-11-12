@@ -40,9 +40,9 @@ $def with (page, vars=None)
 			function showPosition(mapholder_div, latitude, longitude) {
 			    var latlon = latitude + "," + longitude;
 
-			    var img_url = "http://maps.googleapis.com/maps/api/staticmap?center="+latlon+"&zoom=12&size=800x800&sensor=false&markers=size:mid%7Ccolor:0xff0000%7C"+latlon;
+			    var img_url = "http://maps.googleapis.com/maps/api/staticmap?center="+latlon+"&zoom=12&size=640x480&sensor=false&markers=size:mid%7Ccolor:0xff0000%7C"+latlon;
 
-			    document.getElementById(mapholder_div).innerHTML = "<img width=\"100%\" src='"+img_url+"'>";
+			    document.getElementById(mapholder_div).innerHTML = "<img class=\"img-responsive\" src='"+img_url+"'>";
 			    document.getElementById("myCanvas").hidden = false;
 			}
 
