@@ -208,6 +208,17 @@ class index:
             }
             current_path = dumps(d)
             new_path_cond.notifyAll()
+            # store relevant logs:
+            fname = abspath + '/logs/graphotti_%s.json' % str(datetime.now())
+            with open(fname, 'w') as f:
+                log_data = {
+                    'path': p,
+                    'env': env,
+                    'longitude': longitude,
+                    'latitude': latitude,
+                    'timestamp': str(datetime.now())
+                }
+                f.write(dumps(log_data))
         finally:
             new_path_cond.release()
         return web.ok()

@@ -4,10 +4,10 @@ listen_port = 8212
 # 1/300 fades it out in 10 seconds
 client_decay = 1.0 / (30 * 30)
 # fading out for the server
-server_decay = 1.0 / (30 * 30)
+server_decay = 1.0 / (30 * 60)
 
 # how much the points wiggle about in pixels
-server_jitter = 0.1
+server_jitter = 0.15
 
 config = {
     'width': 1200,
