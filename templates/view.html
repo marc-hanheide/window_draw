@@ -1,8 +1,8 @@
 $def with (data)
 
-$var title: WindowDraw.
+$var title: Graphotti View.
 
-<canvas id="myCanvas" keepalive="true" resize="true" style="border:0px solid #666666;background: black;">
+<canvas id="myCanvas" keepalive="true" resize="true" style="border:2px solid #FFFFFF;background: black;">
 	
 </canvas>
 <p/>
@@ -205,11 +205,14 @@ $var title: WindowDraw.
 			    	return;
 			    path = new Path()
 			    path.importJSON(d['path']);
-			    console.log(mX);
+
 			    path.scale(zoom,[0,0]);
 			    path.smooth();
 			    //path.strokeColor = [1, 0.3, 0.3, 0.8];
-			    path.strokeWidth = 5*zoom,
+			    path.strokeWidth = 5*zoom;
+				for (var s in path.segments) {
+					path.segments[s].point.x = view.viewSize.width - path.segments[s].point.x;
+				}
 			    mX = path.position.x;
 			    mY = path.position.y;
 			    paths.push(path);

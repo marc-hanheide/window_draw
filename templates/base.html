@@ -84,18 +84,18 @@ $def with (page, vars=None)
 			}
 
 	 		function maximise(view, canvas_id) {
-				console.log("window: x=" + window.innerWidth + " y=" + window.innerHeight);
+				//console.log("window: x=" + window.innerWidth + " y=" + window.innerHeight);
 				var canvas = document.getElementById(canvas_id);
 				pw = canvas.parentNode.clientWidth;
 				ph = canvas.parentNode.clientHeight;
 				var xr = (pw-30) / destWidth;
-				var yr = (window.innerHeight-50) / destHeight;
+				var yr = (window.innerHeight-20) / destHeight;
 				zoom = Math.min(xr,yr);
 
-				console.log("before view: x="+view.viewSize.width+" y="+view.viewSize.height);
-				console.log("before client: x="+canvas.clientWidth+" y="+canvas.clientHeight);
+				//console.log("before view: x="+view.viewSize.width+" y="+view.viewSize.height);
+				//console.log("before client: x="+canvas.clientWidth+" y="+canvas.clientHeight);
 				pixel_ratio = view.pixelRatio;
-				console.log("pixel_ratio: " + pixel_ratio);
+				//console.log("pixel_ratio: " + pixel_ratio);
 
 				$$("#" + canvas_id).css("width", (destWidth  * zoom).toString());
 				$$("#" + canvas_id).css("height", (destHeight  * zoom).toString());
@@ -103,7 +103,7 @@ $def with (page, vars=None)
 				view.setViewSize(destWidth  * zoom, destHeight * zoom)
 				$$("#" + canvas_id).css("width", (destWidth  * zoom).toString());
 				$$("#" + canvas_id).css("height", (destHeight  * zoom).toString());
-				console.log("after view: x="+view.viewSize.width+" y="+view.viewSize.height);
+				//console.log("after view: x="+view.viewSize.width+" y="+view.viewSize.height);
 				//canvas.width = destWidth  * zoom;
 				// console.log(destHeight * zoom+ " " + canvas.height);
 				// console.log(destHeight * zoom+ " " + canvas.height);
@@ -114,9 +114,10 @@ $def with (page, vars=None)
 	 		}
 
 	 		window.onresize = function(event) {
-				console.log("resize.view: x="+paper.view.viewSize.width+" y="+paper.view.viewSize.height);
-				console.log(event.target.innerWidth);
+				// console.log("resize.view: x="+paper.view.viewSize.width+" y="+paper.view.viewSize.height);
+				// console.log(event.target.innerWidth);
 				maximise(paper.view, "myCanvas");
+
 
 	 		}
 

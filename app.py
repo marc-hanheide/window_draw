@@ -17,6 +17,7 @@ from os import _exit
 from datetime import datetime
 from twython import Twython, TwythonError
 from StringIO import StringIO
+from PIL import Image
 
 import config
 
@@ -249,6 +250,17 @@ class image_store:
     def POST(self):
         global last_snapshot
         i = web.input()
+        image_in = StringIO()
+        image_in.write(i['data'])
+        image_in.seek(0)
+
+        img = Image.open(image_in)
+        img_flipped = img.transpose(Image.FLIP_LEFT_RIGHT)
+
+        image_out = StringIO()
+        img_flipped.save(image_out, 'jpeg')
+        i['data'] = image_out.getvalue()
+
         fname = abspath + '/images/graphotti_%s.jpg' % str(datetime.now())
         with open(fname, 'w') as f:
             f.write(i['data'])

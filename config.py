@@ -11,7 +11,7 @@ server_jitter = 0.15
 
 config = {
     'width': 1200,
-    'height': 1400
+    'height': 1200
 }
 
 location = (53.2329633, -0.5457987)

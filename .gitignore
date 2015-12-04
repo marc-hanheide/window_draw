@@ -3,3 +3,4 @@
 /twitter_config.json
 *.pyc
 /images
+/logs
