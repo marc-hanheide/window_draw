@@ -103,7 +103,8 @@ class Tweeter():
         if nchar < 140:
             try:
                 photo = open(photo_path, 'rb')
-                self._twitter.update_status_with_media(status=text, media=photo)
+                self._twitter.update_status_with_media(status=text,
+                                                       media=photo)
             except TwythonError as e:
                 print e
         else:
@@ -238,6 +239,7 @@ class about:
 
 class tweet:
     def POST(self):
+        global last_snapshot
         i = web.input()
         if last_snapshot is not None:
             tweeter.tweet_photo(str(datetime.now()), last_snapshot['blob'])
@@ -247,6 +249,16 @@ class tweet:
 
 
 class image_store:
+
+    def GET(self):
+        if last_snapshot is None:
+            return web.ok()
+        else:
+            web.header('Content-Type', 'image/png')  # file type
+            # web.header('Content-disposition',
+            #            'attachment; filename=graphotti.png')
+            return last_snapshot['blob']
+
     def POST(self):
         global last_snapshot
         i = web.input()
