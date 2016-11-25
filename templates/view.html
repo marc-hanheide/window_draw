@@ -3,45 +3,45 @@ $def with (data)
 $var title: Graphotti View.
 
 <canvas id="myCanvas" keepalive="true" resize="true" style="border:2px solid #FFFFFF;background: black;">
-	
+  
 </canvas>
 <p/>
 <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=https://lcas.lincoln.ac.uk/graphotti/" alt="QR code">
 
- 	<!-- <script type="text/javascript" src="/static/js/snow.min.js"></script> -->
+  <!-- <script type="text/javascript" src="/static/js/snow.min.js"></script> -->
  
-	<script type="text/javascript">
-	var     mX = -100, mY = -100;
+  <script type="text/javascript">
+  var     mX = -100, mY = -100;
 
 
     function store_bitmap(){
-		var canvas = document.getElementById('myCanvas');
+    var canvas = document.getElementById('myCanvas');
 
-	    canvas.toBlob(function(blob) { 
-			var fd = new FormData();
-			fd.append('fname', 'test.jpg');
-			fd.append('data', blob);
-			$$.ajax({
-			    type: 'POST',
-			    url: 'image_store',
-			    data: fd,
-			    processData: false,
-			    contentType: false
-			}).done(function(data) {
-			});
-	    }, "image/jpeg");
-	}
+      canvas.toBlob(function(blob) { 
+      var fd = new FormData();
+      fd.append('fname', 'test.jpg');
+      fd.append('data', blob);
+      $$.ajax({
+          type: 'POST',
+          url: 'image_store',
+          data: fd,
+          processData: false,
+          contentType: false
+      }).done(function(data) {
+      });
+      }, "image/jpeg");
+  }
 
-	function fullscreen(eid){
-	           var el = document.getElementById('myCanvas');
-	 
-	           if(el.webkitRequestFullScreen) {
-	               el.webkitRequestFullScreen();
-	           }
-	          else {
-	             el.mozRequestFullScreen();
-	          }            
-	}
+  function fullscreen(eid){
+             var el = document.getElementById('myCanvas');
+   
+             if(el.webkitRequestFullScreen) {
+                 el.webkitRequestFullScreen();
+             }
+            else {
+               el.mozRequestFullScreen();
+            }            
+  }
  
 
 
@@ -49,18 +49,18 @@ $var title: Graphotti View.
 
 
 
-	window.onload = function() {
+  window.onload = function() {
 
-		// $$.fn.snow();
+    // $$.fn.snow();
 
-	    //snow_init();
+      //snow_init();
 
 
-		decay_factor = 1.0;
+    decay_factor = 1.0;
 
-		// Get a reference to the canvas object
-		var canvas = document.getElementById('myCanvas');
-		canvas.addEventListener("click",function () {
+    // Get a reference to the canvas object
+    var canvas = document.getElementById('myCanvas');
+    canvas.addEventListener("click",function () {
             var el = document.getElementById('myCanvas');
  
             if(el.webkitRequestFullScreen) {
@@ -69,193 +69,223 @@ $var title: Graphotti View.
             else {
               el.mozRequestFullScreen();
             }            
-		});
+    });
 
 
 
 
-		// var destWidth = 640;
-		// var destHeight = 480;
-		// var xr = (window.innerWidth-10) / destWidth;
-		// var yr = (window.innerHeight-10) / destHeight;
-		// var zoom = Math.min(xr,yr);
-		// canvas.width = destWidth * zoom;
-		// canvas.height = destHeight * zoom;
+    // var destWidth = 640;
+    // var destHeight = 480;
+    // var xr = (window.innerWidth-10) / destWidth;
+    // var yr = (window.innerHeight-10) / destHeight;
+    // var zoom = Math.min(xr,yr);
+    // canvas.width = destWidth * zoom;
+    // canvas.height = destHeight * zoom;
 
-		// Create an empty project and a view for the canvas:
-		paper.setup(canvas);
-		with (paper) {
-			maximise(view, "myCanvas");
-
-
-			var flakes = [],
-			    flakeCount = 50;
-
-			function snow() {
-
-			    for (var i = 0; i < flakeCount; i++) {
-			        var flake = flakes[i],
-			            x = mX,
-			            y = mY,
-			            minDist = 150,
-			            x2 = flake.x,
-			            y2 = flake.y;
-
-			        var dist = Math.sqrt((x2 - x) * (x2 - x) + (y2 - y) * (y2 - y)),
-			            dx = x2 - x,
-			            dy = y2 - y;
-
-			        if (dist < minDist) {
-			            var force = minDist / (dist * dist),
-			                xcomp = (x - x2) / dist,
-			                ycomp = (y - y2) / dist,
-			                deltaV = force / 2;
-
-			            flake.velX -= deltaV * xcomp;
-			            flake.velY -= deltaV * ycomp;
-
-			        } else {
-			            flake.velX *= .98;
-			            if (flake.velY <= flake.speed) {
-			                flake.velY = flake.speed
-			            }
-			            flake.velX += Math.cos(flake.step += .05) * flake.stepSize;
-			        }
-
-			        //ctx.fillStyle = "rgba(255,255,255," + flake.opacity + ")";
-			        flake.y += flake.velY;
-			        flake.x += flake.velX;
-			            
-			        if (flake.y >= canvas.height || flake.y <= 0) {
-			            reset(flake);
-			        }
+    // Create an empty project and a view for the canvas:
+    paper.setup(canvas);
+    with (paper) {
+      maximise(view, "myCanvas");
 
 
-			        if (flake.x >= canvas.width || flake.x <= 0) {
-			            reset(flake);
-			        }
+      var flakes = [],
+          flakeCount = 50;
 
-			        flake.flake.position = new paper.Point(flake.x, flake.y);
+      function snow() {
+          for (var i = 0; i < flakeCount; i++) {
+              var flake = flakes[i],
+                  x = mX,
+                  y = mY,
+                  minDist = 150,
+                  x2 = flake.x,
+                  y2 = flake.y;
 
-			        //ctx.beginPath();
-			        //ctx.arc(flake.x, flake.y, flake.size, 0, Math.PI * 2);
-			        //ctx.fill();
-			    }
-			    //requestAnimationFrame(snow);
-			};
+              var dist = Math.sqrt((x2 - x) * (x2 - x) + (y2 - y) * (y2 - y)),
+                  dx = x2 - x,
+                  dy = y2 - y;
 
-			function reset(flake) {
-			    flake.x = Math.floor(Math.random() * canvas.width);
-			    flake.y = 0;
-			    flake.size = (Math.random() * 3) + 1;
-			    flake.speed = (Math.random() * 0.8) + 0.2;
-			    flake.velY = flake.speed;
-			    flake.velX = 0;
-			    flake.opacity = (Math.random() * 0.5) + 0.2;
-			}
+              if (dist < minDist) {
+                  var force = minDist / (dist * dist),
+                      xcomp = (x - x2) / dist,
+                      ycomp = (y - y2) / dist,
+                      deltaV = force / 2;
 
-			function snow_init() {
+                  flake.velX -= deltaV * xcomp;
+                  flake.velY -= deltaV * ycomp;
 
-			    for (var i = 0; i < flakeCount; i++) {
-			        var x = Math.floor(Math.random() * canvas.width),
-			            y = Math.floor(Math.random() * canvas.height),
-			            size = (Math.random() * 2) + 1,
-			            speed = (Math.random() * 1) + 0.5,
-			            opacity = (Math.random() * 0.5) + 0.3;
+              } else {
+                  flake.velX *= .98;
+                  if (flake.velY <= flake.speed) {
+                      flake.velY = flake.speed
+                  }
+                  flake.velX += Math.cos(flake.step += .05) * flake.stepSize;
+              }
 
-					//var flake = new paper.Path.Circle( new paper.Point(x,y), size);
-                                        var flake = new paper.Path.Star( new paper.Point(x,y), 8, size, size*2);
-
-					flake.style = {
-						fillColor: 'white',
-						strokeColor: 'white'
-					}; //Path coloring
-					flake.style.fillColor.alpha = opacity;
-					flake.style.strokeColor.alpha = opacity;
-
-			        flakes.push({
-			        	flake: flake,
-			            speed: speed,
-			            velY: speed,
-			            velX: 0,
-			            x: x,
-			            y: y,
-			            size: size,
-			            stepSize: (Math.random()) / 30,
-			            step: 0,
-			            angle: 180,
-			            opacity: opacity
-			        });
-			    }
-
-			    snow();
-			};
+              //ctx.fillStyle = "rgba(255,255,255," + flake.opacity + ")";
+              flake.y += flake.velY;
+              flake.x += flake.velX;
+                  
+              if (flake.y >= canvas.height || flake.y <= 0) {
+                  reset(flake);
+              }
 
 
-			snow_init();
+              if (flake.x >= canvas.width || flake.x <= 0) {
+                  reset(flake);
+              }
+
+              flake.flake.position = new paper.Point(flake.x, flake.y);
+
+              //ctx.beginPath();
+              //ctx.arc(flake.x, flake.y, flake.size, 0, Math.PI * 2);
+              //ctx.fill();
+          }
+          //requestAnimationFrame(snow);
+      };
 
 
-			var source = new EventSource("sse");
-			// text = new PointText(new Point(20, 20));
-			// text.justification = 'left';
-			// text.fillColor = 'green';
-			// text.fontSize = 24;
-			// text.content = 'draw on your phone';
-			source.onmessage = function(event) {
-				var d = JSON.parse(event.data);
-			    if (d['path'].length == 0)
-			    	return;
-			    path = new Path()
-			    path.importJSON(d['path']);
+      function stars() {
+          for (var i = 0; i < flakeCount; i++) {
+              var flake = flakes[i],
+                  x = mX,
+                  y = mY,
+                  minDist = 150,
+                  x2 = flake.x,
+                  y2 = flake.y;
+              //console.log(flake);
 
-			    path.scale(zoom,[0,0]);
-			    path.smooth();
-			    //path.strokeColor = [1, 0.3, 0.3, 0.8];
-			    path.strokeWidth = 5*zoom;
-				for (var s in path.segments) {
-					path.segments[s].point.x = view.viewSize.width - path.segments[s].point.x;
-				}
-			    mX = path.position.x;
-			    mY = path.position.y;
-			    paths.push(path);
-			    view.draw();
-			    store_bitmap();
-				//snow_init();
-
-			};
-			
-		    view.onFrame = function(event) {
-		    	snow();
-		    	var max_t = 0;
-				for (var p in paths) {
-					if (paths[p].strokeColor.alpha > max_t)
-						max_t = paths[p].strokeColor.alpha;
-				}
-				for (var p in paths) {
-					var t = paths[p].strokeColor.alpha;
-					if (max_t >=0.5)
-						t = t - ($config.server_decay * decay_factor);
-					//paths[p].strokeWidth = Math.random()*5+1;
-					for (var s in paths[p].segments) {
-						paths[p].segments[s].point.x +=  (Math.random()-0.5) 
-							* $config.server_jitter;
-						paths[p].segments[s].point.y +=  (Math.random()-0.5) 
-							* $config.server_jitter;
-					}
-					//console.log(t);
-					if (t <= 0.0) {
-						paths[p].remove();
-						paths.splice(p,1);
-					} else {
-						paths[p].strokeColor.alpha = t;
-					}
-					
-				}
-
-			}
-			
+              //console.log(flake.scaling);
+              scale = Math.random() -0.5;
+              //flake.flake.scaling.x += scale;
+              //flake.flake.scaling.y += scale;
+              flake.flake.rotation += scale;
+              //flake.flake.style.fillColor.brightness += scale;
+              flake.flake.style.fillColor.alpha += scale /30.0;
+              flake.flake.style.strokeColor = flake.flake.style.fillColor;
+              //ctx.beginPath();
+              //ctx.arc(flake.x, flake.y, flake.size, 0, Math.PI * 2);
+              //ctx.fill();
+          }
+          //requestAnimationFrame(snow);
+      };
 
 
-		}
-	}
+      function reset(flake) {
+          flake.x = Math.floor(Math.random() * canvas.width);
+          flake.y = 0;
+          flake.size = (Math.random() * 3) + 1;
+          flake.speed = (Math.random() * 0.8) + 0.2;
+          flake.velY = flake.speed;
+          flake.velX = 0;
+          flake.opacity = (Math.random() * 0.5) + 0.2;
+      }
+
+      function snow_init() {
+
+          for (var i = 0; i < flakeCount; i++) {
+              var x = Math.floor(Math.random() * canvas.width),
+                  y = Math.floor(Math.random() * canvas.height),
+                  size = (Math.random() * 4) + 1,
+                  speed = (Math.random() * 1) + 0.5,
+                  opacity = (Math.random() * 0.5) + 0.4;
+
+              //var flake = new paper.Path.Circle( new paper.Point(x,y), size);
+              var flake = new paper.Path.Star( new paper.Point(x,y), 8, size, size*2);
+
+              flake.style = {
+                fillColor: 'red',
+                strokeColor: 'red'
+              }; //Path coloring
+              flake.style.fillColor.alpha = opacity;
+              flake.style.fillColor.hue = speed*255;
+              flake.style.fillColor.saturation = 0.1;
+              //flake.style.strokeColor.hue = speed*255;
+              flake.style.strokeColor = flake.style.fillColor;
+              //flake.style.fillColor.saturation = 0.2;
+
+              flakes.push({
+                flake: flake,
+                  speed: speed,
+                  velY: speed,
+                  velX: 0,
+                  x: x,
+                  y: y,
+                  size: size,
+                  stepSize: (Math.random()) / 30,
+                  step: 0,
+                  angle: 180,
+                  opacity: opacity
+              });
+          }
+
+          stars();
+      };
+
+
+      snow_init();
+
+
+      var source = new EventSource("sse");
+      // text = new PointText(new Point(20, 20));
+      // text.justification = 'left';
+      // text.fillColor = 'green';
+      // text.fontSize = 24;
+      // text.content = 'draw on your phone';
+      source.onmessage = function(event) {
+        var d = JSON.parse(event.data);
+          if (d['path'].length == 0)
+            return;
+          path = new Path()
+          path.importJSON(d['path']);
+
+          path.scale(zoom,[0,0]);
+          path.smooth();
+          //path.strokeColor = [1, 0.3, 0.3, 0.8];
+          path.strokeWidth = 5*zoom;
+        for (var s in path.segments) {
+          path.segments[s].point.x = view.viewSize.width - path.segments[s].point.x;
+        }
+          mX = path.position.x;
+          mY = path.position.y;
+          paths.push(path);
+          view.draw();
+          store_bitmap();
+        //snow_init();
+
+      };
+      
+      view.onFrame = function(event) {
+        stars();
+        var max_t = 0;
+        for (var p in paths) {
+          if (paths[p].strokeColor.alpha > max_t)
+            max_t = paths[p].strokeColor.alpha;
+        }
+        for (var p in paths) {
+          var t = paths[p].strokeColor.alpha;
+          if (max_t >=0.5)
+            t = t - ($config.server_decay * decay_factor);
+          //paths[p].strokeWidth = Math.random()*5+1;
+          for (var s in paths[p].segments) {
+            paths[p].segments[s].point.x +=  (Math.random()-0.5) 
+              * $config.server_jitter;
+            paths[p].segments[s].point.y +=  (Math.random()-0.5) 
+              * $config.server_jitter;
+          }
+          //console.log(t);
+          if (t <= 0.0) {
+            paths[p].remove();
+            paths.splice(p,1);
+          } else {
+            paths[p].strokeColor.alpha = t;
+          }
+          
+        }
+
+      }
+      
+
+
+    }
+  }
 </script>
