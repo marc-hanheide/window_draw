@@ -283,7 +283,7 @@ $var title: Graphotti View.
         }
         for (var p in paths) {
           var t = paths[p].strokeColor.alpha;
-          if (max_t >=0.5)
+          if (max_t >=0.7)
             t = t - ($config.server_decay * decay_factor);
           //paths[p].strokeWidth = Math.random()*5+1;
           for (var s in paths[p].segments) {

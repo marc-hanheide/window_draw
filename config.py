@@ -7,7 +7,7 @@ client_decay = 1.0 / (30 * 30)
 server_decay = 1.0 / (30 * 30)
 
 # how much the points wiggle about in pixels
-server_jitter = 0.1
+server_jitter = 0.05
 
 config = {
     'width': 1200,
@@ -16,6 +16,6 @@ config = {
 
 location = (53.2329633, -0.5457987)
 # maximal 10km away
-max_distance = 1000
+max_distance = 10
 
 sparkle_prob = 0.99
