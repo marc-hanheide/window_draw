@@ -164,7 +164,7 @@ current_path = dumps({'path': [],
 last_snapshot = None
 
 
-### Renderers for actual interface:
+# Renderers for actual interface:
 class index:
     def GET(self):
         # session.count += 1
@@ -226,12 +226,11 @@ class index:
         return web.ok()
 
 
-### Renderers for actual interface:
 class view:
     def GET(self):
         return renderer.view(config.config)
 
-### Renderers for actual interface:
+
 class about:
     def GET(self):
         return renderer.about(config.config)
@@ -243,7 +242,7 @@ class tweet:
         i = web.input()
         if last_snapshot is not None:
             tweeter.tweet_photo(str(datetime.now()), last_snapshot['blob'])
-            #tweeter.tweet('test')
+            # tweeter.tweet('test')
         print i
         return web.ok()
 

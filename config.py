@@ -4,10 +4,10 @@ listen_port = 8212
 # 1/300 fades it out in 10 seconds
 client_decay = 1.0 / (30 * 30)
 # fading out for the server
-server_decay = 1.0 / (30 * 60)
+server_decay = 1.0 / (30 * 30)
 
 # how much the points wiggle about in pixels
-server_jitter = 0.15
+server_jitter = 0.1
 
 config = {
     'width': 1200,
@@ -16,4 +16,6 @@ config = {
 
 location = (53.2329633, -0.5457987)
 # maximal 10km away
-max_distance = 10
+max_distance = 1000
+
+sparkle_prob = 0.99

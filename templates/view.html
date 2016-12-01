@@ -2,7 +2,7 @@ $def with (data)
 
 $var title: Graphotti View.
 
-<canvas id="myCanvas" keepalive="true" resize="true" style="border:2px solid #FFFFFF;background: black;">
+<canvas id="myCanvas" keepalive="true" resize="true" style="border:0px solid #333333;background: black;">
   
 </canvas>
 <p/>
@@ -89,7 +89,7 @@ $var title: Graphotti View.
 
 
       var flakes = [],
-          flakeCount = 50;
+          flakeCount = 150;
 
       function snow() {
           for (var i = 0; i < flakeCount; i++) {
@@ -155,12 +155,32 @@ $var title: Graphotti View.
               //console.log(flake);
 
               //console.log(flake.scaling);
-              scale = Math.random() -0.5;
-              //flake.flake.scaling.x += scale;
-              //flake.flake.scaling.y += scale;
-              flake.flake.rotation += scale;
+              if (Math.random() > 0.9999)
+                  flake.velX=Math.random() * 0.5+0.5  ;
+              else if (Math.random()> 0.99995) {
+                  flake.x = Math.floor(Math.random() * canvas.width);
+                  flake.y = Math.floor(Math.random() * canvas.height);
+                  flake.flake.position = new paper.Point(flake.x, flake.y);
+              }
+
+              if (flake.flake.scaling.x > 4.0) 
+                  flake.velX = -flake.velX;
+              if (flake.flake.scaling.x < 0.9) {
+                  flake.velX = 0;
+                  scale = 1;
+                  flake.flake.scaling.x += scale;
+                  flake.flake.scaling.y += scale;
+              } else {
+                  scale =+ flake.velX;
+                  flake.flake.scaling.x += scale;
+                  flake.flake.scaling.y += scale;
+              }
+              //flake.flake.rotation += scale;
+              flake.flake.style.fillColor.brightness = flake.flake.scaling.x/2;
+              flake.flake.style.fillColor.alpha = flake.flake.scaling.x;
+
               //flake.flake.style.fillColor.brightness += scale;
-              flake.flake.style.fillColor.alpha += scale /30.0;
+              //flake.flake.style.fillColor.alpha += scale /30.0;
               flake.flake.style.strokeColor = flake.flake.style.fillColor;
               //ctx.beginPath();
               //ctx.arc(flake.x, flake.y, flake.size, 0, Math.PI * 2);
@@ -185,12 +205,12 @@ $var title: Graphotti View.
           for (var i = 0; i < flakeCount; i++) {
               var x = Math.floor(Math.random() * canvas.width),
                   y = Math.floor(Math.random() * canvas.height),
-                  size = (Math.random() * 4) + 1,
+                  size = (Math.random() * 1) + 0.1,
                   speed = (Math.random() * 1) + 0.5,
                   opacity = (Math.random() * 0.5) + 0.4;
 
-              //var flake = new paper.Path.Circle( new paper.Point(x,y), size);
-              var flake = new paper.Path.Star( new paper.Point(x,y), 8, size, size*2);
+              var flake = new paper.Path.Circle( new paper.Point(x,y), size);
+              //var flake = new paper.Path.Star( new paper.Point(x,y), 8, size, size*0.9);
 
               flake.style = {
                 fillColor: 'red',
@@ -239,12 +259,12 @@ $var title: Graphotti View.
           path.importJSON(d['path']);
 
           path.scale(zoom,[0,0]);
-          path.smooth();
           //path.strokeColor = [1, 0.3, 0.3, 0.8];
           path.strokeWidth = 5*zoom;
-        for (var s in path.segments) {
-          path.segments[s].point.x = view.viewSize.width - path.segments[s].point.x;
-        }
+          for (var s in path.segments) {
+            path.segments[s].point.x = view.viewSize.width - path.segments[s].point.x;
+          }
+          path.smooth('continuous');
           mX = path.position.x;
           mY = path.position.y;
           paths.push(path);
