@@ -163,13 +163,13 @@ $var title: Graphotti View.
                   flake.flake.position = new paper.Point(flake.x, flake.y);
               }
 
-              if (flake.flake.scaling.x > 4.0) 
-                  flake.velX = -flake.velX;
+              if (flake.flake.scaling.x > 4.0 && flake.velX > 0) 
+                  flake.velX = -1;
               if (flake.flake.scaling.x < 0.9) {
                   flake.velX = 0;
                   scale = 1;
-                  flake.flake.scaling.x += scale;
-                  flake.flake.scaling.y += scale;
+                  flake.flake.scaling.x = scale;
+                  flake.flake.scaling.y = scale;
               } else {
                   scale =+ flake.velX;
                   flake.flake.scaling.x += scale;
