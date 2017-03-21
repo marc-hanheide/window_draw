@@ -166,25 +166,8 @@ last_snapshot = None
 
 
 # Renderers for actual interface:
-class index_simple:
-    def GET(self):
-        # session.count += 1
-        # session.env = {}
-        # for (k, v) in web.ctx.env.items():
-        #     if type(v) is str:
-        #         session.env[k] = v
-        return renderer.index_simple(config.config)
 
-
-class index:
-    def GET(self):
-        # session.count += 1
-        # session.env = {}
-        # for (k, v) in web.ctx.env.items():
-        #     if type(v) is str:
-        #         session.env[k] = v
-        return renderer.index(config.config)
-
+class DrawPage:
     def POST(self):
         global current_path
         i = web.input()
@@ -237,6 +220,27 @@ class index:
         finally:
             new_path_cond.release()
         return web.ok()
+
+
+class index_simple(DrawPage):
+    def GET(self):
+        # session.count += 1
+        # session.env = {}
+        # for (k, v) in web.ctx.env.items():
+        #     if type(v) is str:
+        #         session.env[k] = v
+        return renderer.index_simple(config.config)
+
+
+class index(DrawPage):
+    def GET(self):
+        # session.count += 1
+        # session.env = {}
+        # for (k, v) in web.ctx.env.items():
+        #     if type(v) is str:
+        #         session.env[k] = v
+        return renderer.index(config.config)
+
 
 
 class view:

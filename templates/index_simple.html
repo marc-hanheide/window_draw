@@ -30,7 +30,7 @@ $var title: GraPHOtti.
 	<script type="text/javascript">
 
 		function send_path(path) {
-			$$.post('..', path).fail(function() {
+			$$.post('#', path).fail(function() {
     			alert( "you are not allowed to draw from where you are!" );
   			});
 		}
