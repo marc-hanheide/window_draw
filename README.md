@@ -1,4 +1,4 @@
-# window_draw
-A social drawing web app for WestEndLights 2015
+# Graphotti
+A social drawing web app for WestEndLights 2015/16
 
-(c) by Marc Hanheide 2015
+(c) by Marc Hanheide 2016

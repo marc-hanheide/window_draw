@@ -5,8 +5,8 @@ $var title: Graphotti View.
 <canvas id="myCanvas" keepalive="true" resize="true" style="border:0px solid #333333;background: black;">
   
 </canvas>
-<p/>
-<img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=https://lcas.lincoln.ac.uk/graphotti/" alt="QR code">
+<!--<p/>
+<img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=https://lcas.lincoln.ac.uk/graphotti/" alt="QR code">-->
 
   <!-- <script type="text/javascript" src="/static/js/snow.min.js"></script> -->
  
@@ -262,7 +262,12 @@ $var title: Graphotti View.
           //path.strokeColor = [1, 0.3, 0.3, 0.8];
           path.strokeWidth = 5*zoom;
           for (var s in path.segments) {
-            path.segments[s].point.x = view.viewSize.width - path.segments[s].point.x;
+            
+            $if data['mirror']:
+                path.segments[s].point.x = view.viewSize.width - path.segments[s].point.x;
+            $else:
+                path.segments[s].point.x = path.segments[s].point.x;
+            //path.segments[s].point.x = view.viewSize.width - path.segments[s].point.x;
           }
           path.smooth('continuous');
           mX = path.position.x;
