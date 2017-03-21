@@ -11,7 +11,8 @@ server_jitter = 0.05
 
 config = {
     'width': 1200,
-    'height': 1200
+    'height': 1200,
+    'mirror': False
 }
 
 location = (53.2329633, -0.5457987)
@@ -19,3 +20,4 @@ location = (53.2329633, -0.5457987)
 max_distance = 10
 
 sparkle_prob = 0.99
+

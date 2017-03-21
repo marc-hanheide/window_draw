@@ -29,6 +29,7 @@ from geopy.distance import vincenty
 
 urls = (
     '/', 'index',
+    '/simple', 'index_simple',
     '/image_store', 'image_store',
     '/tweet', 'tweet',
     '/sse', 'SSEServer',
@@ -165,6 +166,16 @@ last_snapshot = None
 
 
 # Renderers for actual interface:
+class index_simple:
+    def GET(self):
+        # session.count += 1
+        # session.env = {}
+        # for (k, v) in web.ctx.env.items():
+        #     if type(v) is str:
+        #         session.env[k] = v
+        return renderer.index_simple(config.config)
+
+
 class index:
     def GET(self):
         # session.count += 1
@@ -182,16 +193,18 @@ class index:
         if 'latitude' in i:
             latitude = float(i['latitude'])
         else:
-            latitude = 0.0
+            latitude = -1.0
         if 'longitude' in i:
             longitude = float(i['longitude'])
         else:
-            longitude = 0.0
+            longitude = -1.0
 
         geo_location = (latitude, longitude)
 
-        if not geo_fence.valid_position(geo_location):
-            return web.notacceptable()
+        print latitude
+        if not latitude < 0.0:
+            if not geo_fence.valid_position(geo_location):
+                return web.notacceptable()
 
         #pixel_ratio = float(i['pixel_ratio'])
         for s in p[1]['segments']:
