@@ -132,7 +132,19 @@ $var title: GraPHOtti.
 			$$.post('tweet', {});
 		}
 
+		function init_imu() {
+			if (window.DeviceMotionEvent != undefined) {
+				window.ondevicemotion = function(e) {
+					if (event.acceleration.x != null) {
+						console.log(event.acceleration.x + ' m/s2');
+					}
+				} 
+			}
+		}
+
 		window.onload = function() {
+
+			init_imu();
 
 			getLocation();
 
