@@ -23,8 +23,7 @@ $var title: GraPHOtti.
 		<div class="jumbotron">
 		  <div class="container">
 		  	<h1>GraPHOtti: Graffiti from your PHOne onto our Window</h1>
-		  	<p>A collaborative, digital Graffiti experience</p>
-		    <p><a href="#draw">Draw</a> on our bay window together, <br/><a href="#share">Share</a> your art, <br/>enjoy collaborative creativity.</p>
+		    <p><a href="#draw">Draw</a> on our bay window together. Shake your device and see what happens.</p>
 		  </div>
 		</div>
 
@@ -132,9 +131,10 @@ $var title: GraPHOtti.
 			$$.post('tweet', {});
 		}
 
-		function send_acc(a) {
+		function send_acc(a, t) {
 			$$.post('acc', {
-				'acc_abs': a
+				'acc_abs': a,
+				'acc_time': t
 			});
 		}
 
@@ -142,22 +142,29 @@ $var title: GraPHOtti.
 		function init_imu() {
 			acc_abs = 0.0;
 			acc_time = 0.0;
+			count = 0;
+			last_ts = Date.now();
 			if (window.DeviceMotionEvent != undefined) {
 				window.ondevicemotion = function(e) {
-					if (event.acceleration.x != null) {
+					if (event.accelerationIncludingGravity.x != null) {
 						var ab = Math.sqrt(
-											event.acceleration.x * event.acceleration.x +
-											event.acceleration.y * event.acceleration.y +
-											event.acceleration.z * event.acceleration.z
-										);
+											event.accelerationIncludingGravity.x * event.accelerationIncludingGravity.x +
+											event.accelerationIncludingGravity.y * event.accelerationIncludingGravity.y +
+											event.accelerationIncludingGravity.z * event.accelerationIncludingGravity.z
+										) - 9.82;
 						// accumulated acceleration
-						acc_abs = acc_abs + ab * (event.interval / 1000.0);
+						acc_abs = acc_abs + ab
 						acc_time = acc_time + event.interval;
-						if (acc_time > 1000) {
-							if (ab > 2.0)
-								console.log(ab + ' m/s2');
-								send_acc(acc_abs);
+						count = count + 1;
+						if (Date.now() > last_ts+500) {
+							acc_abs = acc_abs / count;
+							if (acc_abs > 1.0) {
+								console.log(acc_abs + ' m/s2 ');
+								send_acc(acc_abs, acc_time);
+							}
 							acc_abs = 0.0;
+							count = 0;
+							last_ts = Date.now();
 							acc_time = 0;
 						}
 						

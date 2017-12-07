@@ -66,7 +66,8 @@ current_energy = 0.0
 class Acc():
 
     def __init__(self):
-        self.rate = .5
+        self.up_rate = .6
+        self.down_rate = .4
 
     def response(self, data):
         response = "data: " + data + "\n\n"
@@ -76,8 +77,9 @@ class Acc():
         global current_energy
         i = web.input()
         acc = float(loads(i['acc_abs']))
-        current_energy = current_energy + (self.rate / (1.0 - self.rate)) * acc
-        print "last energy: %f" % (acc)
+        acc_time = float(loads(i['acc_time']))
+        current_energy = current_energy + self.up_rate * acc
+        print "last energy: %f, acc_time: %f" % (acc, acc_time)
 
         new_acc_cond.acquire()
         try:
@@ -96,7 +98,7 @@ class Acc():
             try:
                 if block:
                     new_acc_cond.wait(timeout=2)
-                current_energy = (1.0 - self.rate) * current_energy
+                current_energy = (1.0 - self.down_rate) * current_energy
                 e = dumps({'energy': current_energy})
                 print e
             finally:

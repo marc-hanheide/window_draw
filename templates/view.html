@@ -203,12 +203,23 @@ $var title: Graphotti View.
       }
 
       function snow_init() {
-
+          var text1 = new PointText(new Point(0, 10));
+          text1.justification = 'left';
+          text1.fillColor = 'grey';
+          text1.content = 'open https://lncn.eu/graphotti on your phone';
+          $if data['mirror']:
+              text1.scale(-1,1);
+          var text2 = new PointText(new Point(canvas.width, 10));
+          text2.justification = 'right';
+          text2.fillColor = 'grey';
+          text2.content = 'draw or shake your device';
+          $if data['mirror']:
+              text2.scale(-1,1);
           for (var i = 0; i < flakeCount; i++) {
               var x = Math.floor(Math.random() * canvas.width),
                   y = Math.floor(Math.random() * canvas.height),
-                  size = (Math.random() * 1) + 0.5,
-                  speed = (Math.random() * 1) + 0.5,
+                  size = (Math.random() * 1) + 0.7,
+                  speed = (Math.random() * 1) + 0.7,
                   opacity = (Math.random() * 0.5) + 0.5;
 
               //var flake = new paper.Path.Circle( new paper.Point(x,y), size);
@@ -240,7 +251,7 @@ $var title: Graphotti View.
               });
           }
 
-          stars();
+          //stars();
       };
 
 
@@ -297,14 +308,14 @@ $var title: Graphotti View.
         }
         for (var p in paths) {
           var t = paths[p].strokeColor.alpha;
-          if (max_t >=0.7)
+          if (max_t >=0.7 || energy > 10.0)
             t = t - ($config.server_decay * decay_factor);
           //paths[p].strokeWidth = Math.random()*5+1;
           for (var s in paths[p].segments) {
             paths[p].segments[s].point.x +=  (Math.random()-0.5) 
-              * $config.server_jitter;
+              * $config.server_jitter * energy ;
             paths[p].segments[s].point.y +=  (Math.random()-0.5) 
-              * $config.server_jitter;
+              * $config.server_jitter * energy ;
           }
           //console.log(t);
           if (t <= 0.0) {
