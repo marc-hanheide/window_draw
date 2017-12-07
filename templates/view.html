@@ -13,23 +13,25 @@ $var title: Graphotti View.
   <script type="text/javascript">
   var     mX = -100, mY = -100;
 
+  var energy = 0.0;
 
-    function store_bitmap(){
-    var canvas = document.getElementById('myCanvas');
 
-      canvas.toBlob(function(blob) { 
-      var fd = new FormData();
-      fd.append('fname', 'test.jpg');
-      fd.append('data', blob);
-      $$.ajax({
-          type: 'POST',
-          url: 'image_store',
-          data: fd,
-          processData: false,
-          contentType: false
-      }).done(function(data) {
-      });
-      }, "image/jpeg");
+  function store_bitmap(){
+  var canvas = document.getElementById('myCanvas');
+
+    canvas.toBlob(function(blob) { 
+    var fd = new FormData();
+    fd.append('fname', 'test.jpg');
+    fd.append('data', blob);
+    $$.ajax({
+        type: 'POST',
+        url: 'image_store',
+        data: fd,
+        processData: false,
+        contentType: false
+    }).done(function(data) {
+    });
+    }, "image/jpeg");
   }
 
   function fullscreen(eid){
@@ -122,8 +124,8 @@ $var title: Graphotti View.
               }
 
               //ctx.fillStyle = "rgba(255,255,255," + flake.opacity + ")";
-              flake.y += flake.velY;
-              flake.x += flake.velX;
+              flake.y += flake.velY + (Math.random() - 0.5)*energy ;
+              flake.x += flake.velX + (Math.random() - 0.5)*energy ; ;
                   
               if (flake.y >= canvas.height || flake.y <= 0) {
                   reset(flake);
@@ -205,9 +207,9 @@ $var title: Graphotti View.
           for (var i = 0; i < flakeCount; i++) {
               var x = Math.floor(Math.random() * canvas.width),
                   y = Math.floor(Math.random() * canvas.height),
-                  size = (Math.random() * 1) + 0.1,
+                  size = (Math.random() * 1) + 0.5,
                   speed = (Math.random() * 1) + 0.5,
-                  opacity = (Math.random() * 0.5) + 0.4;
+                  opacity = (Math.random() * 0.5) + 0.5;
 
               //var flake = new paper.Path.Circle( new paper.Point(x,y), size);
               var flake = new paper.Path.Star( new paper.Point(x,y), 8, size, size*0.9);
@@ -244,6 +246,12 @@ $var title: Graphotti View.
 
       snow_init();
 
+      var acc_source = new EventSource("acc");
+      acc_source.onmessage = function(event) {
+        var d = JSON.parse(event.data);
+        energy = d['energy'];
+        console.log("acc=" + d['energy']);
+      }
 
       var source = new EventSource("sse");
       // text = new PointText(new Point(20, 20));

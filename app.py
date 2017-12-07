@@ -34,6 +34,7 @@ urls = (
     '/tweet', 'tweet',
     '/sse', 'SSEServer',
     '/view', 'view',
+    '/acc', 'Acc',
     '/about', 'about'
 )
 
@@ -58,6 +59,52 @@ class Geofence():
         d = self.distance(location)
         print "distance: %f" % d
         return d < self.max_distance
+
+
+current_energy = 0.0
+
+class Acc():
+
+    def __init__(self):
+        self.rate = .5
+
+    def response(self, data):
+        response = "data: " + data + "\n\n"
+        return response
+
+    def POST(self):
+        global current_energy
+        i = web.input()
+        acc = float(loads(i['acc_abs']))
+        current_energy = current_energy + (self.rate / (1.0 - self.rate)) * acc
+        print "last energy: %f" % (acc)
+
+        new_acc_cond.acquire()
+        try:
+            new_acc_cond.notifyAll()
+        finally:
+            new_acc_cond.release()
+
+    def GET(self):
+        global current_energy
+        block = False
+        web.header("Content-Type", "text/event-stream")
+        web.header('Cache-Control', 'no-cache')
+        web.header('Content-length:', 0)
+        while is_running:
+            new_acc_cond.acquire()
+            try:
+                if block:
+                    new_acc_cond.wait(timeout=2)
+                current_energy = (1.0 - self.rate) * current_energy
+                e = dumps({'energy': current_energy})
+                print e
+            finally:
+                new_acc_cond.release()
+            block = True
+            if e is not None:
+                r = self.response(str(e))
+                yield r
 
 
 class Tweeter():
@@ -158,6 +205,7 @@ else:
 # web.config.session_parameters['timeout'] = 3600
 
 new_path_cond = Condition()
+new_acc_cond = Condition()
 current_path = dumps({'path': [],
                      'dummy': range(1, 2048),  # data to stop proxy buffering
                       })
@@ -184,7 +232,7 @@ class DrawPage:
 
         geo_location = (latitude, longitude)
 
-        print latitude
+        #print latitude
         if not latitude < 0.0:
             if not geo_fence.valid_position(geo_location):
                 return web.notacceptable()

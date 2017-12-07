@@ -132,11 +132,36 @@ $var title: GraPHOtti.
 			$$.post('tweet', {});
 		}
 
+		function send_acc(a) {
+			$$.post('acc', {
+				'acc_abs': a
+			});
+		}
+
+
 		function init_imu() {
+			acc_abs = 0.0;
+			acc_time = 0.0;
 			if (window.DeviceMotionEvent != undefined) {
 				window.ondevicemotion = function(e) {
 					if (event.acceleration.x != null) {
-						console.log(event.acceleration.x + ' m/s2');
+						var ab = Math.sqrt(
+											event.acceleration.x * event.acceleration.x +
+											event.acceleration.y * event.acceleration.y +
+											event.acceleration.z * event.acceleration.z
+										);
+						// accumulated acceleration
+						acc_abs = acc_abs + ab * (event.interval / 1000.0);
+						acc_time = acc_time + event.interval;
+						if (acc_time > 1000) {
+							if (ab > 2.0)
+								console.log(ab + ' m/s2');
+								send_acc(acc_abs);
+							acc_abs = 0.0;
+							acc_time = 0;
+						}
+						
+
 					}
 				} 
 			}
