@@ -336,7 +336,10 @@ class image_store:
         image_in.seek(0)
 
         img = Image.open(image_in)
-        img_flipped = img.transpose(Image.FLIP_LEFT_RIGHT)
+        if config.config['mirror']:
+            img_flipped = img.transpose(Image.FLIP_LEFT_RIGHT)
+        else:
+            img_flipped = img
 
         image_out = StringIO()
         img_flipped.save(image_out, 'jpeg')
