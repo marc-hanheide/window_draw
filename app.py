@@ -308,7 +308,10 @@ class tweet:
         global last_snapshot
         i = web.input()
         if last_snapshot is not None:
-            tweeter.tweet_photo(str(datetime.now()), last_snapshot['blob'])
+            #tweeter.tweet_photo(str(datetime.now()), last_snapshot['blob'])
+            tweeter.tweet_photo(
+                "This doodle has been shared by @graph0tti for @WestEndLights", last_snapshot['blob']
+            )
             # tweeter.tweet('test')
         print i
         return web.ok()
