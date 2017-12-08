@@ -47,7 +47,7 @@ $var title: GraPHOtti.
 
 						<canvas id="myCanvas" border="1" keepalive="true" resize="true" style="border:2px solid #555555;background: black;">
 						</canvas>
-						<a type="button" class="btn btn-warning btn-block" href="image_store"><h3>View current window</h3> <img src="image_store" width="50px" /></a>
+						<a type="button" class="btn btn-warning btn-block" href="/graphotti/image_store"><h3>View current window</h3> <img src="/graphotti/image_store" width="50px" /></a>
 
 					</div>				
 				</div>
@@ -132,7 +132,7 @@ $var title: GraPHOtti.
 		}
 
 		function send_acc(a, t) {
-			$$.post('acc', {
+			$$.post('/graphotti/acc', {
 				'acc_abs': a,
 				'acc_time': t
 			});
