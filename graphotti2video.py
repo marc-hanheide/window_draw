@@ -25,7 +25,7 @@ class Graphotti2Video:
             if len(n) == 1:
                 dt = datetime.strptime(n[0], '%Y-%m-%d %H:%M:%S.%f')
                 secs = mktime(dt.timetuple())
-                res[secs] = path.join(dir,f)
+                res[secs] = path.join(dir, f)
         return res
 
     def get_img_dict(self, dir):

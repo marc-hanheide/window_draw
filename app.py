@@ -99,6 +99,8 @@ class Acc():
                 if block:
                     new_acc_cond.wait(timeout=2)
                 current_energy = (1.0 - self.down_rate) * current_energy
+                if current_energy < 0.1:
+                    current_energy = 0
                 e = dumps({'energy': current_energy})
                 print e
             finally:

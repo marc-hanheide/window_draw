@@ -196,7 +196,7 @@ $var title: Graphotti View.
           flake.x = Math.floor(Math.random() * canvas.width);
           flake.y = 0;
           flake.size = (Math.random() * 3) + 1;
-          flake.speed = (Math.random() * 0.8) + 0.2;
+          flake.speed = (Math.random() * 1.0) + 0.7;
           flake.velY = flake.speed;
           flake.velX = 0;
           flake.opacity = (Math.random() * 0.5) + 0.2;
@@ -209,7 +209,7 @@ $var title: Graphotti View.
           text1.content = 'open https://lncn.eu/graphotti on your phone';
           $if data['mirror']:
               text1.scale(-1,1);
-          var text2 = new PointText(new Point(canvas.width, 10));
+          var text2 = new PointText(new Point(canvas.width+200, 10));
           text2.justification = 'right';
           text2.fillColor = 'grey';
           text2.content = 'draw or shake your device';
