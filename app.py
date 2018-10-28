@@ -62,6 +62,7 @@ class Geofence():
 
 
 current_energy = 0.0
+gravities = []
 
 class Acc():
 
@@ -74,21 +75,24 @@ class Acc():
         return response
 
     def POST(self):
-        global current_energy
+        global current_energy, gravities
         i = web.input()
         acc = float(loads(i['acc_abs']))
         acc_time = float(loads(i['acc_time']))
+        current_gravity_angle = float(loads(i['gravity_angle']))
+        # gravity_angle = gravity_angle * .5 + current_gravity_angle * .5
         current_energy = current_energy + self.up_rate * acc
-        print "last energy: %f, acc_time: %f" % (acc, acc_time)
+        print "last energy: %f, acc_time: %f, current_gravity_angle: %f" % (acc, acc_time, current_gravity_angle)
 
         new_acc_cond.acquire()
+        gravities.append(current_gravity_angle)
         try:
             new_acc_cond.notifyAll()
         finally:
             new_acc_cond.release()
 
     def GET(self):
-        global current_energy
+        global current_energy, gravities
         block = False
         web.header("Content-Type", "text/event-stream")
         web.header('Cache-Control', 'no-cache')
@@ -98,8 +102,17 @@ class Acc():
             try:
                 if block:
                     new_acc_cond.wait(timeout=2)
+                gravity_angle = 0.0
+                if len(gravities) > 0:
+                    for a in gravities:
+                        gravity_angle += a
+                    gravity_angle /= len(gravities)
+                    del gravities[:]
                 current_energy = (1.0 - self.down_rate) * current_energy
-                e = dumps({'energy': current_energy})
+                e = dumps({
+                    'energy': current_energy,
+                    'gravity_angle': gravity_angle
+                })
                 print e
             finally:
                 new_acc_cond.release()
