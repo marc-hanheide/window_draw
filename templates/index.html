@@ -132,7 +132,7 @@ $var title: GraPHOtti.
 		}
 
 		function send_acc(a, t, gravity_angle) {
-			$$.post('acc', {
+			$$.post(location.pathname + '/acc', {
 				'acc_abs': a,
 				'acc_time': t,
 				'gravity_angle': gravity_angle
@@ -158,7 +158,7 @@ $var title: GraPHOtti.
 						acc_abs = acc_abs + ab
 						acc_time = acc_time + event.interval;
 						count = count + 1;
-						if (Date.now() > last_ts+500) {
+						if (Date.now() > last_ts+250) {
 							acc_abs = acc_abs / count;
 							//if (acc_abs > 1.0) {
 								console.log(acc_abs + ' m/s2 ');
