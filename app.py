@@ -34,6 +34,7 @@ urls = (
     '/tweet', 'tweet',
     '/sse', 'SSEServer',
     '/view', 'view',
+    '/acc', 'Acc',
     '/about', 'about'
 )
 
@@ -58,6 +59,67 @@ class Geofence():
         d = self.distance(location)
         print "distance: %f" % d
         return d < self.max_distance
+
+
+current_energy = 0.0
+gravities = []
+
+class Acc():
+
+    def __init__(self):
+        self.up_rate = .6
+        self.down_rate = .4
+
+    def response(self, data):
+        response = "data: " + data + "\n\n"
+        return response
+
+    def POST(self):
+        global current_energy, gravities
+        i = web.input()
+        acc = float(loads(i['acc_abs']))
+        acc_time = float(loads(i['acc_time']))
+        current_gravity_angle = float(loads(i['gravity_angle']))
+        # gravity_angle = gravity_angle * .5 + current_gravity_angle * .5
+        current_energy = current_energy + self.up_rate * acc
+        print "last energy: %f, acc_time: %f, current_gravity_angle: %f" % (acc, acc_time, current_gravity_angle)
+
+        new_acc_cond.acquire()
+        gravities.append(current_gravity_angle)
+        try:
+            new_acc_cond.notifyAll()
+        finally:
+            new_acc_cond.release()
+
+    def GET(self):
+        global current_energy, gravities
+        block = False
+        web.header("Content-Type", "text/event-stream")
+        web.header('Cache-Control', 'no-cache')
+        web.header('Content-length:', 0)
+        while is_running:
+            new_acc_cond.acquire()
+            try:
+                if block:
+                    new_acc_cond.wait(timeout=2)
+                gravity_angle = 0.0
+                if len(gravities) > 0:
+                    for a in gravities:
+                        gravity_angle += a
+                    gravity_angle /= len(gravities)
+                    del gravities[:]
+                current_energy = (1.0 - self.down_rate) * current_energy
+                e = dumps({
+                    'energy': current_energy,
+                    'gravity_angle': gravity_angle
+                })
+                print e
+            finally:
+                new_acc_cond.release()
+            block = True
+            if e is not None:
+                r = self.response(str(e))
+                yield r
 
 
 class Tweeter():
@@ -158,6 +220,7 @@ else:
 # web.config.session_parameters['timeout'] = 3600
 
 new_path_cond = Condition()
+new_acc_cond = Condition()
 current_path = dumps({'path': [],
                      'dummy': range(1, 2048),  # data to stop proxy buffering
                       })
@@ -184,7 +247,7 @@ class DrawPage:
 
         geo_location = (latitude, longitude)
 
-        print latitude
+        #print latitude
         if not latitude < 0.0:
             if not geo_fence.valid_position(geo_location):
                 return web.notacceptable()
@@ -258,7 +321,10 @@ class tweet:
         global last_snapshot
         i = web.input()
         if last_snapshot is not None:
-            tweeter.tweet_photo(str(datetime.now()), last_snapshot['blob'])
+            #tweeter.tweet_photo(str(datetime.now()), last_snapshot['blob'])
+            tweeter.tweet_photo(
+                "This doodle has been shared by @graph0tti for @WestEndLights", last_snapshot['blob']
+            )
             # tweeter.tweet('test')
         print i
         return web.ok()
@@ -283,7 +349,10 @@ class image_store:
         image_in.seek(0)
 
         img = Image.open(image_in)
-        img_flipped = img.transpose(Image.FLIP_LEFT_RIGHT)
+        if config.config['mirror']:
+            img_flipped = img.transpose(Image.FLIP_LEFT_RIGHT)
+        else:
+            img_flipped = img
 
         image_out = StringIO()
         img_flipped.save(image_out, 'jpeg')

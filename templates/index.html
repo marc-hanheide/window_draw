@@ -16,15 +16,19 @@ $var title: GraPHOtti.
  -->	
 		<ul class="nav nav-tabs">
 		  <li role="presentation" class="active"><a href="#draw">Doodle</a></li>
-		  <li role="presentation"><a href="about">About</a></li>
+		  <li role="presentation"><a href="/graphotti/about">About</a></li>
 		  <li role="presentation"><a href="#share">Share</a></li>
 		</ul>
 
 		<div class="jumbotron">
 		  <div class="container">
 		  	<h1>GraPHOtti: Graffiti from your PHOne onto our Window</h1>
+
 		  	<p>A collaborative, digital Graffiti snow globe.</p>
 		    <p><a href="#draw">Draw</a> on our bay window together. Turn and shake your phone for a wintery snow storm.</p>
+
+		    
+
 		  </div>
 		</div>
 
@@ -48,7 +52,7 @@ $var title: GraPHOtti.
 
 						<canvas id="myCanvas" border="1" keepalive="true" resize="true" style="border:2px solid #555555;background: black;">
 						</canvas>
-						<a type="button" class="btn btn-warning btn-block" href="image_store"><h3>View current window</h3> <img src="image_store" width="50px" /></a>
+						<a type="button" class="btn btn-warning btn-block" href="/graphotti/image_store"><h3>View current window</h3> <img src="/graphotti/image_store" width="50px" /></a>
 
 					</div>				
 				</div>
@@ -132,7 +136,54 @@ $var title: GraPHOtti.
 			$$.post('tweet', {});
 		}
 
+		function send_acc(a, t, gravity_angle) {
+			$$.post(location.pathname + '/acc', {
+				'acc_abs': a,
+				'acc_time': t,
+				'gravity_angle': gravity_angle
+			});
+		}
+
+
+		function init_imu() {
+			acc_abs = 0.0;
+			acc_time = 0.0;
+			count = 0;
+			last_ts = Date.now();
+			if (window.DeviceMotionEvent != undefined) {
+				window.ondevicemotion = function(e) {
+					if (event.accelerationIncludingGravity.x != null) {
+						var ab = Math.sqrt(
+											event.accelerationIncludingGravity.x * event.accelerationIncludingGravity.x +
+											event.accelerationIncludingGravity.y * event.accelerationIncludingGravity.y +
+											event.accelerationIncludingGravity.z * event.accelerationIncludingGravity.z
+										) - 9.82;
+						var gravity_angle = Math.atan2(event.accelerationIncludingGravity.x, event.accelerationIncludingGravity.y);
+						// accumulated acceleration
+						acc_abs = acc_abs + ab
+						acc_time = acc_time + event.interval;
+						count = count + 1;
+						if (Date.now() > last_ts+250) {
+							acc_abs = acc_abs / count;
+							//if (acc_abs > 1.0) {
+								console.log(acc_abs + ' m/s2 ');
+								send_acc(acc_abs, acc_time, gravity_angle);
+							//}
+							acc_abs = 0.0;
+							count = 0;
+							last_ts = Date.now();
+							acc_time = 0;
+						}
+						
+
+					}
+				} 
+			}
+		}
+
 		window.onload = function() {
+
+			init_imu();
 
 			getLocation();
 
