@@ -50,7 +50,7 @@ $var title: GraPHOtti.
 						<a name="draw"></a>
 						<button type="button" class="btn btn-success btn-block" onclick="fullscreen_canvas();">Go fullscreen!</button>
 
-						<canvas id="myCanvas" border="1" keepalive="true" resize="true" style="border:2px solid #555555;background: black;">
+						<canvas id="myCanvas" border="1" keepalive="true" width="600" height="600" resize="true" style="border:2px solid #555555;background: black;">
 						</canvas>
 						<a type="button" class="btn btn-warning btn-block" href="/graphotti/image_store"><h3>View current window</h3> <img src="/graphotti/image_store" width="50px" /></a>
 
@@ -113,6 +113,8 @@ $var title: GraPHOtti.
 
 
 	<script type="text/javascript">
+
+
 
 		function fullscreen_canvas() {
             var el = document.getElementById('myCanvas');
@@ -196,6 +198,8 @@ $var title: GraPHOtti.
 
 
 			with (paper) {
+    		    maximise(view, "myCanvas");
+
 				// Create a simple drawing tool:
 				var tool = new Tool();
 				var path;

@@ -2,9 +2,21 @@ $def with (data)
 
 $var title: Graphotti View.
 
-<canvas id="myCanvas" keepalive="true" resize="true" style="border:0px solid #333333;background: black;">
-  
-</canvas>
+    <style>
+      canvas[resize] {
+         width: 100%;
+          height: 100%;
+      }
+    </style>
+    <div class="container">
+      <div class="row">
+
+        <canvas id="myCanvas" keepalive="true" resize="true" width="600" height="600" style="width: 600px; height: 600px; Vertical-align: middle; border:0px solid #333333;background: black;">
+          
+        </canvas>
+      </div>
+    </div>
+
 <!--<p/>
 <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=https://lcas.lincoln.ac.uk/graphotti/" alt="QR code">-->
 
@@ -48,7 +60,39 @@ $var title: Graphotti View.
  
 
 
+// window.addEventListener(
+//     'load',
+//     function () {
+//         var canvas = document.getElementsByTagName('canvas')[0];
 
+//         fullscreenify(canvas);
+//     },
+//     false
+// );
+
+// function fullscreenify(canvas) {
+//     var style = canvas.getAttribute('style') || '';
+    
+//     window.addEventListener('resize', function () {resize(canvas);}, false);
+
+//     resize(canvas);
+
+//     function resize(canvas) {
+//         var scale = {x: 1, y: 1};
+//         scale.x = (window.innerWidth - 10) / canvas.width;
+//         scale.y = (window.innerHeight - 10) / canvas.height;
+//         console.log(canvas);
+//         if (scale.x < 1 || scale.y < 1) {
+//             scale = '1, 1';
+//         } else if (scale.x < scale.y) {
+//             scale = scale.x + ', ' + scale.x;
+//         } else {
+//             scale = scale.y + ', ' + scale.y;
+//         }
+        
+//         canvas.setAttribute('style', style + ' ' + '-ms-transform-origin: center top; -webkit-transform-origin: center top; -moz-transform-origin: center top; -o-transform-origin: center top; transform-origin: center top; -ms-transform: scale(' + scale + '); -webkit-transform: scale3d(' + scale + ', 1); -moz-transform: scale(' + scale + '); -o-transform: scale(' + scale + '); transform: scale(' + scale + ');');
+//     }
+// }
 
 
 
@@ -137,6 +181,7 @@ $var title: Graphotti View.
               //console.log(canvas.height);
               var border = false;
               var border_width = 1;
+
               if (newY >= view.viewSize.height-border_width) {
                   newY = view.viewSize.height-border_width;
                   border = true;
@@ -247,15 +292,16 @@ $var title: Graphotti View.
           text1.content = 'open https://lncn.eu/graphotti on your phone';
           $if data['mirror']:
               text1.scale(-1,1);
-          var text2 = new PointText(new Point(canvas.width, 10));
+          var text2 = new PointText(new Point(view.viewSize.width, 10));
+          console.log(view.viewSize.width);
           text2.justification = 'right';
           text2.fillColor = 'grey';
-          text2.content = 'draw or shake your device';
+          text2.content = 'draw on, turn or shake your device';
           $if data['mirror']:
               text2.scale(-1,1);
           for (var i = 0; i < flakeCount; i++) {
-              var x = Math.floor(Math.random() * canvas.width),
-                  y = Math.floor(Math.random() * canvas.height),
+              var x = Math.floor(Math.random() * view.viewSize.width),
+                  y = Math.floor(Math.random() * view.viewSize.height),
                   size = (Math.random() * 1) + 1.7,
                   speed = (Math.random() * 1) + 1.7,
                   opacity = (Math.random() * 0.5) + 0.5;
@@ -317,6 +363,7 @@ $var title: Graphotti View.
           if (d['path'].length == 0)
             return;
           path = new Path()
+          console.log(d);
           path.importJSON(d['path']);
 
           path.scale(zoom,[0,0]);
