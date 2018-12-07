@@ -371,6 +371,7 @@ canvas[resize] {
       // text.content = 'draw on your phone';
       source.onmessage = function(event) {
         var d = JSON.parse(event.data);
+          maximise(view, "myCanvas");
           if (d['path'].length == 0)
             return;
           path = new Path()
