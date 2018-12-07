@@ -20,18 +20,15 @@ $var title: GraPHOtti.
 		  <li role="presentation"><a href="#share">Share</a></li>
 		</ul>
 
-		<div class="jumbotron">
-		  <div class="container">
-		  	<h1>GraPHOtti: Graffiti from your PHOne onto our Window</h1>
+		<div class="jumbotron jumbotron-fluid">
+		  	<h1><small>Graffiti on your phone</small></h1>
 
-		  	<p>A collaborative, digital "graffiti snow globe."</p>
-		    <a href="#draw">Draw</a> on our window! Turn and shake your phone for a wintery snow storm.</p>
-
-		    
-
-		  </div>
+		  	<p><small>
+		  		A collaborative, creative "graffiti snow globe".
+		    	<b>Draw</b> on our window! <b>Turn</b> and <b>shake</b> your phone for a wintery snow storm.
+		    </small>
+		    </p>
 		</div>
-
 
 		<style>
 			canvas[resize] {
@@ -44,14 +41,18 @@ $var title: GraPHOtti.
 				<div class="panel panel-default">
 				  	<div class="panel-heading">
 						<a name="draw" ></a>
-				    	<h3 class="panel-title">Doodle here</h3>
+				    	<h3 class="panel-title">Draw here <small>(don't forget to turn and shack your phone, too!)</small></h3>
 				  	</div>
 				  	<div class="panel-body text-center">
 						<a name="draw"></a>
 						<button type="button" class="btn btn-success btn-block" onclick="fullscreen_canvas();">Go fullscreen!</button>
 
-						<canvas id="myCanvas" border="1" keepalive="true" width="600" height="600" resize="true" style="border:2px solid #555555;background: black;">
-						</canvas>
+					    <div id="canvascontainer" style="text-align:center">
+					    	<div style="max-width: 100vmin; max-height: 100vmin">
+								<canvas id="myCanvas" border="1" keepalive="true" width="600" height="600" resize="true" style="border:2px solid #555555;background: black;">
+								</canvas>
+							</div>
+						</div>
 						<a type="button" class="btn btn-warning btn-block" href="/graphotti/image_store"><h3>View current window</h3> <img src="/graphotti/image_store" width="50px" /></a>
 
 					</div>				
@@ -66,9 +67,11 @@ $var title: GraPHOtti.
 				  	<div class="panel-body">
 						<a name="share"></a>
 						<button type="button" class="btn btn-primary btn-block" onclick="tweet();">Tweet current doodle on @graPH0tti</button>
+					</div>
+<!-- 				  	<div class="panel-body">
 
 
-						<div class="fb-like" data-href="https://lcas.lincoln.ac.uk/graphotti/about" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>
+						<div class="fb-like" data-href="https://lcas.lincoln.ac.uk/graphotti/about" data-layout="standard" data-action="like" data-show-faces="false" data-share="true"></div>
 
 				  		<a href="https://twitter.com/graPH0tti" class="twitter-follow-button" data-show-count="false" data-size="large" data-dnt="true">Follow @graPH0tti</a>
 						<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
@@ -82,32 +85,24 @@ $var title: GraPHOtti.
 						<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>				
 
 					</div>
+-->
 				</div>
-
+ 
 
 			</div>
-                        <div class="row">
-                                <div class="panel panel-default">
-                                        <div class="panel-heading">
-                                        <h3 class="panel-title">Where you are</h3>
-                                        </div>
-                                        <div class="panel-body">
-                                                <div id="mapholder"><H3>GraPHOtti needs to know your location to make sure you are close to our Window before you are allowed to draw.</H3></div>
-                                        </div>
-                                </div>
-                        </div>
-
+<!-- 
+			<div class="row">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 class="panel-title">Where you are</h3>
+					</div>
+					<div class="panel-body">
+						<div id="mapholder"><H3>GraPHOtti needs to know your location to make sure you are close to our Window before you are allowed to draw.</H3></div>
+					</div>
+				</div>
+			</div>
+ -->
 		</div>
-
-
-	    <footer class="footer">
-      		<div class="container">
-      			<small>
-        			<p class="text-muted">GraPHOtti, &copy; Marc Hanheide 2018, <br/><a href="https://github.com/marc-hanheide/window_draw">https://github.com/marc-hanheide/window_draw</a></p>
-    			</small>
-      		</div>
-    	</footer>
-
 
 
 
@@ -117,7 +112,7 @@ $var title: GraPHOtti.
 
 
 		function fullscreen_canvas() {
-            var el = document.getElementById('myCanvas');
+            var el = document.getElementById('canvascontainer');
  
             if(el.webkitRequestFullScreen) {
                el.webkitRequestFullScreen();
@@ -168,7 +163,7 @@ $var title: GraPHOtti.
 						if (Date.now() > last_ts+250) {
 							acc_abs = acc_abs / count;
 							//if (acc_abs > 1.0) {
-								console.log(acc_abs + ' m/s2 ');
+								//console.log(acc_abs + ' m/s2 ');
 								send_acc(acc_abs, acc_time, gravity_angle);
 							//}
 							acc_abs = 0.0;
@@ -275,6 +270,13 @@ $var title: GraPHOtti.
 					
 				}
 
+			    if (document.addEventListener)
+			    {
+			        document.addEventListener('webkitfullscreenchange', handle_fullscreen, false);
+			        document.addEventListener('mozfullscreenchange', handle_fullscreen, false);
+			        document.addEventListener('fullscreenchange', handle_fullscreen, false);
+			        document.addEventListener('MSFullscreenChange', handle_fullscreen, false);
+			    }
 				maximise(view, "myCanvas");		
 
 

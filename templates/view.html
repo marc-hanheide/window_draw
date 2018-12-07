@@ -9,29 +9,19 @@ canvas[resize] {
 }
 </style>
 
-<div class="jumbotron">
-  <div class="container">
-    <h1>GraPHOtti: Graffiti from your PHOne onto our Window</h1>
-
-    <p>A collaborative, digital "graffiti snow globe."</p>
-    <a href="#draw">Draw</a> on our window! Turn and shake your phone for a wintery snow storm.</p>
-
-
-
-  </div>
-</div>
-
-<div class="container">
+<div  class="container-fluid" style="background: black; max-height: 100vmin">
   <div class="row">
 
     <div class="panel panel-default">
       <div class="panel-heading">
         <a name="draw" ></a>
-        <h3 class="panel-title">Doodle here</h3>
+        <h3 class="panel-title">View here</h3>
       </div>
-      <div class="panel-body text-center">
-        <canvas id="myCanvas" keepalive="true" resize="true" width="600" height="600" style="width: 600px; height: 600px; Vertical-align: middle; border:0px solid #333333;background: black;">
-        </canvas>
+      <div id="canvascontainer" style="text-align:center">
+        <div  class="panel-body text-center" style="margin:0 auto; background: black; max-width: 100vmin; max-height: 100vmin">
+          <canvas class="text-center" id="myCanvas" keepalive="true" resize="true" width="2600" height="2600" style="border:0px solid #333333;background: black;">
+          </canvas>
+        </div>
       </div>
     </div>
   </div>
@@ -68,7 +58,7 @@ canvas[resize] {
   }
 
   function fullscreen(eid){
-             var el = document.getElementById('myCanvas');
+             var el = document.getElementById('canvascontainer');
    
              if(el.webkitRequestFullScreen) {
                  el.webkitRequestFullScreen();
@@ -116,6 +106,7 @@ canvas[resize] {
 
 
 
+
   window.onload = function() {
 
     //$$.fn.snow();
@@ -128,15 +119,16 @@ canvas[resize] {
     // Get a reference to the canvas object
     var canvas = document.getElementById('myCanvas');
     canvas.addEventListener("click",function () {
-            var el = document.getElementById('myCanvas');
+            var el = document.getElementById('canvascontainer');
  
             if(el.webkitRequestFullScreen) {
                el.webkitRequestFullScreen();
             }
             else {
               el.mozRequestFullScreen();
-            }            
+            }
     });
+
 
 
 
@@ -313,7 +305,7 @@ canvas[resize] {
           $if data['mirror']:
               text1.scale(-1,1);
           var text2 = new PointText(new Point(view.viewSize.width, 10));
-          console.log(view.viewSize.width);
+
           text2.justification = 'right';
           text2.fillColor = 'grey';
           text2.content = 'draw on, turn or shake your device';
@@ -367,7 +359,6 @@ canvas[resize] {
       var acc_source = new EventSource("acc");
       acc_source.onmessage = function(event) {
         var d = JSON.parse(event.data);
-        console.log("acc: " + event.data);
         energy = d['energy'];
         gravity = d['gravity_angle'];
       }
@@ -383,7 +374,7 @@ canvas[resize] {
           if (d['path'].length == 0)
             return;
           path = new Path()
-          console.log(d);
+          //console.log(d);
           path.importJSON(d['path']);
 
           path.scale(zoom,[0,0]);
