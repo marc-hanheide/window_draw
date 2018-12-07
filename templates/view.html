@@ -24,6 +24,20 @@ canvas[resize] {
         </div>
       </div>
     </div>
+
+<!--     <div class="panel panel-default">
+      <div class="panel-heading">
+        <a name="draw" ></a>
+        <h3 class="panel-title">Video</h3>
+      </div>
+      <div>
+        <div  class="panel-body text-center">
+          <video autoplay controls style="background-color:black" id="video">
+          </video>
+        </div>
+      </div>
+    </div>
+ -->
   </div>
 </div>
 
@@ -129,6 +143,13 @@ canvas[resize] {
             }
     });
 
+    // var canvas = document.getElementById('myCanvas');
+    // var video = document.getElementById('video');
+
+    // // Optional frames per second argument.
+    // var stream = canvas.captureStream(1);
+    // // Set the source of the <video> element to be the stream from the <canvas>.
+    // video.srcObject = stream;
 
 
 
@@ -301,16 +322,16 @@ canvas[resize] {
           var text1 = new PointText(new Point(0, 10));
           text1.justification = 'left';
           text1.fillColor = 'grey';
-          text1.content = 'open https://lncn.eu/graphotti on your phone';
+          text1.content = 'open http://lncn.eu/graphotti on your phone';
           $if data['mirror']:
               text1.scale(-1,1);
           var text2 = new PointText(new Point(view.viewSize.width, 10));
 
-          text2.justification = 'right';
-          text2.fillColor = 'grey';
-          text2.content = 'draw on, turn or shake your device';
-          $if data['mirror']:
-              text2.scale(-1,1);
+          //text2.justification = 'right';
+          //text2.fillColor = 'grey';
+          //text2.content = 'draw on, turn or shake your device';
+          //if data['mirror']:
+          //    text2.scale(-1,1);
           for (var i = 0; i < flakeCount; i++) {
               var x = Math.floor(Math.random() * view.viewSize.width),
                   y = Math.floor(Math.random() * view.viewSize.height),
