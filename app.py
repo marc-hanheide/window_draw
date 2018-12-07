@@ -13,7 +13,7 @@ from json import dumps
 from json import loads
 import sys
 from threading import Condition
-from os import _exit
+from os import _exit, getenv, environ
 from datetime import datetime
 from twython import Twython, TwythonError
 from StringIO import StringIO
@@ -37,6 +37,8 @@ urls = (
     '/acc', 'Acc',
     '/about', 'about'
 )
+
+print(os.environ)
 
 renderer = web.template.render('templates', base="base", globals=globals())
 
@@ -67,8 +69,8 @@ gravities = []
 class Acc():
 
     def __init__(self):
-        self.up_rate = .6
-        self.down_rate = .4
+        self.up_rate = .4
+        self.down_rate = .3
 
     def response(self, data):
         response = "data: " + data + "\n\n"
@@ -110,7 +112,7 @@ class Acc():
                     del gravities[:]
                 current_energy = (1.0 - self.down_rate) * current_energy
                 e = dumps({
-                    'energy': current_energy,
+                    'energy': current_energy / 10.0,
                     'gravity_angle': gravity_angle
                 })
                 print e
@@ -308,7 +310,10 @@ class index(DrawPage):
 
 class view:
     def GET(self):
-        return renderer.view(config.config)
+        master_key = web.ctx.env.get('GRAPHOTTI_MASTER','')
+        i = web.input(key='')
+        print('running as master? %s' % (i.key == master_key))
+        return renderer.view(config.config, (i.key == master_key))
 
 
 class about:

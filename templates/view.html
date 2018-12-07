@@ -1,4 +1,4 @@
-$def with (data)
+$def with (data, master)
 
 $var title: Graphotti View.
 
@@ -9,19 +9,27 @@ canvas[resize] {
 }
 </style>
 
-<div  class="container-fluid" style="background: black; max-height: 100vmin">
+<div  class="container-fluid" style="max-height: 100vmin">
   <div class="row">
 
     <div class="panel panel-default">
       <div class="panel-heading">
         <a name="draw" ></a>
-        <h3 class="panel-title">View here</h3>
+        <h3 class="panel-title">View</h3>
+        $if master:
+            <strong>This is the master view, authenticated by key. Only one of these should be open at a time</strong>
       </div>
       <div id="canvascontainer" style="text-align:center">
-        <div  class="panel-body text-center" style="margin:0 auto; background: black; max-width: 100vmin; max-height: 100vmin">
-          <canvas class="text-center" id="myCanvas" keepalive="true" resize="true" width="2600" height="2600" style="border:0px solid #333333;background: black;">
-          </canvas>
-        </div>
+        $if master:
+            <div  class="panel-body text-center" style="margin:0 auto; background: black; max-width: 100vmin; max-height: 100vmin">
+              <canvas class="text-center" id="myCanvas" keepalive="true" resize="true" width="2600" height="2600" style="border:0px solid #333333;background: black;">
+              </canvas>
+            </div>
+        $else:
+            <div  class="panel-body text-center" style="margin:0 auto; max-width: 70vmin; max-height: 70vmin">
+              <canvas class="text-center" id="myCanvas" keepalive="true" resize="true" width="2600" height="2600" style="border:0px solid #333333;background: black;">
+              </canvas>
+            </div>
       </div>
     </div>
 
@@ -242,7 +250,7 @@ canvas[resize] {
               flake.y = newY;
 
               if (border) {
-                  if (Math.random() > .999 ) {
+                  if (Math.random() > .995 ) {
                       reset(flake);
                   }
               }                  
@@ -311,8 +319,7 @@ canvas[resize] {
           // flake.x = dx;
           // flake.y = dy;
 
-          flake.size = (Math.random() * 5) + 1;
-          flake.speed = (Math.random() * 0.8) + 1.7;
+          flake.speed = (Math.random() * 0.7) + .6;
           flake.velY = flake.speed;
           flake.velX = 0;
           flake.opacity = (Math.random() * 0.5) + 0.2;
@@ -323,7 +330,7 @@ canvas[resize] {
           text1.justification = 'left';
           text1.fillColor = 'grey';
           text1.content = 'open http://lncn.eu/graphotti on your phone';
-          $if data['mirror']:
+          $if master and data['mirror']:
               text1.scale(-1,1);
           var text2 = new PointText(new Point(view.viewSize.width, 10));
 
@@ -335,22 +342,27 @@ canvas[resize] {
           for (var i = 0; i < flakeCount; i++) {
               var x = Math.floor(Math.random() * view.viewSize.width),
                   y = Math.floor(Math.random() * view.viewSize.height),
-                  size = (Math.random() * 1) + 1.7,
-                  speed = (Math.random() * 1) + 1.7,
+                  speed = (Math.random() * 2) + 1.7,
+                  size = (Math.random() * 7) + 3,
                   opacity = (Math.random() * 0.5) + 0.5;
 
               //var flake = new paper.Path.Circle( new paper.Point(x,y), size);
-              var flake = new paper.Path.Star( new paper.Point(x,y), 8, size, size*0.9);
+              //var flake = new paper.Path.Star( new paper.Point(x,y), 6, size, size*0.8);
+
+              var flake = new paper.PointText( new paper.Point(x,y));
+              flake.justification = 'center';
+              flake.fillColor = 'white';
+              flake.fontSize = Math.round(size);
+              flake.content = '\u2744';
 
               flake.style = {
-                fillColor: 'white',
-                strokeColor: 'white'
+                fillColor: 'white'
               }; //Path coloring
               flake.style.fillColor.alpha = opacity;
               flake.style.fillColor.hue = Math.random()*255;
               flake.style.fillColor.saturation = 0.0;
               //flake.style.strokeColor.hue = speed*255;
-              flake.style.strokeColor = flake.style.fillColor;
+              //flake.style.strokeColor = flake.style.fillColor;
               //flake.style.fillColor.saturation = 0.2;
 
               f = {
@@ -375,14 +387,15 @@ canvas[resize] {
       };
 
 
-      snow_init();
+      $if master:
+          snow_init();
 
-      var acc_source = new EventSource("acc");
-      acc_source.onmessage = function(event) {
-        var d = JSON.parse(event.data);
-        energy = d['energy'];
-        gravity = d['gravity_angle'];
-      }
+          var acc_source = new EventSource("acc");
+          acc_source.onmessage = function(event) {
+            var d = JSON.parse(event.data);
+            energy = d['energy'];
+            gravity = d['gravity_angle'];
+          }
 
       var source = new EventSource("sse");
       // text = new PointText(new Point(20, 20));
@@ -404,7 +417,7 @@ canvas[resize] {
           path.strokeWidth = 5*zoom;
           for (var s in path.segments) {
             
-            $if data['mirror']:
+            $if master and data['mirror']:
                 path.segments[s].point.x = view.viewSize.width - path.segments[s].point.x;
             $else:
                 path.segments[s].point.x = path.segments[s].point.x;
@@ -415,14 +428,17 @@ canvas[resize] {
           mY = path.position.y;
           paths.push(path);
           view.draw();
-          store_bitmap();
+          $if master:
+              console.log('store blob');
+              store_bitmap();
         //snow_init();
 
       };
       
       view.onFrame = function(event) {
         //stars();
-        snow();
+        $if master:
+            snow();
         var max_t = 0;
         for (var p in paths) {
           if (paths[p].strokeColor.alpha > max_t)

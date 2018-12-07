@@ -151,19 +151,19 @@ $var title: GraPHOtti.
 				window.ondevicemotion = function(e) {
 					if (event.accelerationIncludingGravity.x != null) {
 						var ab = Math.sqrt(
-											event.accelerationIncludingGravity.x * event.accelerationIncludingGravity.x +
-											event.accelerationIncludingGravity.y * event.accelerationIncludingGravity.y +
-											event.accelerationIncludingGravity.z * event.accelerationIncludingGravity.z
-										) - 9.82;
+											event.acceleration.x * event.acceleration.x +
+											event.acceleration.y * event.acceleration.y +
+											event.acceleration.z * event.acceleration.z
+										) ;
 						var gravity_angle = Math.atan2(event.accelerationIncludingGravity.x, event.accelerationIncludingGravity.y);
 						// accumulated acceleration
 						acc_abs = acc_abs + ab
 						acc_time = acc_time + event.interval;
 						count = count + 1;
-						if (Date.now() > last_ts+250) {
+						if (Date.now() > last_ts+500) {
 							acc_abs = acc_abs / count;
 							//if (acc_abs > 1.0) {
-								//console.log(acc_abs + ' m/s2 ');
+								console.log(acc_abs + ' m/s2 ');
 								send_acc(acc_abs, acc_time, gravity_angle);
 							//}
 							acc_abs = 0.0;
