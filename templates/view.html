@@ -184,7 +184,7 @@ canvas[resize] {
               var flake = flakes[i],
                   x = mX,
                   y = mY,
-                  minDist = 150,
+                  minDist = 100,
                   x2 = flake.x,
                   y2 = flake.y;
 
@@ -192,7 +192,7 @@ canvas[resize] {
                   dx = x2 - x,
                   dy = y2 - y;
 
-              if (dist < minDist) {
+              if (dist < minDist * 5) {
                   var force = minDist / (dist * dist),
                       xcomp = (x - x2) / dist,
                       ycomp = (y - y2) / dist,
@@ -201,7 +201,7 @@ canvas[resize] {
                   flake.velX -= deltaV * xcomp;
                   flake.velY -= deltaV * ycomp;
 
-              } else {
+              }  {
                   flake.velX *= .98;
                   if (flake.velY <= flake.speed) {
                       flake.velY = flake.speed

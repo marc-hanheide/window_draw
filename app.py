@@ -112,7 +112,7 @@ class Acc():
                     del gravities[:]
                 current_energy = (1.0 - self.down_rate) * current_energy
                 e = dumps({
-                    'energy': current_energy / 10.0,
+                    'energy': current_energy / 4.0,
                     'gravity_angle': gravity_angle
                 })
                 print e
