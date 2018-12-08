@@ -7,11 +7,11 @@ client_decay = 1.0 / (30 * 30)
 server_decay = 1.0 / (30 * 30)
 
 # how much the points wiggle about in pixels
-server_jitter = 0.05
+server_jitter = 0.03
 
 config = {
-    'width': 3400,
-    'height': 3400,
+    'width': 600,
+    'height': 600,
     'mirror': True
 }
 
