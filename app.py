@@ -250,9 +250,9 @@ class DrawPage:
         geo_location = (latitude, longitude)
 
         #print latitude
-        if not latitude < 0.0:
-            if not geo_fence.valid_position(geo_location):
-                return web.notacceptable()
+        #if not latitude < 0.0:
+        #    if not geo_fence.valid_position(geo_location):
+        #        return web.notacceptable()
 
         #pixel_ratio = float(i['pixel_ratio'])
         for s in p[1]['segments']:
