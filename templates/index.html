@@ -61,6 +61,21 @@ $var title: GraPHOtti.
 			<div class="row">
 				<div class="panel panel-default">
 				  	<div class="panel-heading">
+						<a name="draw" ></a>
+				    	<h3 class="panel-title">Canny</h3>
+				  	</div>
+				  	<div class="panel-body text-center">
+						<a name="canny"></a>
+						<video hidden id="video" width="640" height="480" autoplay></video>
+						<canvas hidden id="canvas" width="640" height="480"></canvas>
+						<canvas id="canvasOutput" width="640" height="480"></canvas>
+						<button id="snap" onclick="snap_photo();">Snap Photo</button>
+					</div>				
+				</div>
+			</div>
+			<div class="row">
+				<div class="panel panel-default">
+				  	<div class="panel-heading">
 				    	<h3 class="panel-title">Share</h3>
 				    	Share on Twitter and follow posts from others at <a href="https://twitter.com/graPH0tti">https://twitter.com/graPH0tti</a>.
 				  	</div>
@@ -178,9 +193,57 @@ $var title: GraPHOtti.
 			}
 		}
 
+		function init_video() {
+			var video = document.getElementById('video');
+
+			// Get access to the camera!
+			cv['onRuntimeInitialized']=()=>{
+				if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+					// Not adding `{ audio: true }` since we only want video now
+					navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+						//video.src = window.URL.createObjectURL(stream);
+						video.srcObject = stream;
+						//console.log(stream.getVideoTracks());
+						video.play();
+
+						let source = document.getElementById("video");
+						source.onplaying = function () {
+
+							let canvasFrame = document.getElementById("canvas"); // canvasFrame is the id of <canvas>
+							let context = canvasFrame.getContext("2d");
+
+							let ratio = canvasFrame.width / canvasFrame.height;
+							let height = source.videoWidth / ratio;
+							let yOffset = (source.videoHeight - height) / 2;
+							let width = source.videoWidth;
+
+							let src = new cv.Mat(height, width, cv.CV_8UC4);
+							let dst = new cv.Mat(height, width, cv.CV_8UC1);
+							const FPS = 10;
+							function processVideo() {
+								let begin = Date.now();
+								context.drawImage(video, 0, 0, width, height);
+								src.data.set(context.getImageData(0, 0, width, height).data);
+								cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+								cv.Canny(src, dst, 50, 100, 3, false);
+								cv.imshow("canvasOutput", dst); // canvasOutput is the id of another <canvas>;
+								// schedule next one.
+								let delay = 1000/FPS - (Date.now() - begin);
+								setTimeout(processVideo, delay);
+							}
+							// schedule first one.
+							setTimeout(processVideo, 0);
+						};
+					});
+
+				}		
+			}
+		}
+
 		window.onload = function() {
 
 			init_imu();
+			init_video();
 
 			//getLocation();
 

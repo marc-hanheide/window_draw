@@ -123,6 +123,11 @@ class Acc():
                 r = self.response(str(e))
                 yield r
 
+class PhotoServer():
+
+    def POST(self):
+
+        return web.ok()
 
 class Tweeter():
 
