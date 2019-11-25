@@ -66,10 +66,20 @@ $var title: GraPHOtti.
 				  	</div>
 				  	<div class="panel-body text-center">
 						<a name="canny"></a>
-						<video hidden id="video" width="640" height="480" autoplay></video>
-						<canvas hidden id="canvas" width="640" height="480"></canvas>
-						<canvas id="canvasOutput" width="640" height="480"></canvas>
-						<button id="snap" onclick="snap_photo();">Snap Photo</button>
+						<video hidden id="video" width="600" height="600" autoplay></video>
+						<canvas hidden id="canvas" width="600" height="600"></canvas>
+					    <div id="canvascontainer" style="text-align:center">
+					    	<div style="max-width: 100vmin; max-height: 100vmin">
+								<canvas hidden="true" id="canvasOutput" keepalive="true" width="600" height="600" resize="true" style="border:2px solid #555555;background: black;">
+								</canvas>
+								<h3 id="canvasOutput_placeholder">
+									If your camera is working, the video will soon show here. It can be a few more seconds...
+								</h3>
+							</div>
+						</div>
+						<input id="torch"   type="checkbox" >Torch</input>
+						<button type="button" class="btn" id="change_cam">Change Camera</button>
+						<button type="button" id="snap"  class="btn" onclick="snap_photo();">Snap Photo</button>
 					</div>				
 				</div>
 			</div>
@@ -120,10 +130,10 @@ $var title: GraPHOtti.
 		</div>
 
 
+	<script async type="text/javascript"  src="/static/js/opencv.js" onload="register_cv();"></script>
 
 
 	<script type="text/javascript">
-
 
 
 		function fullscreen_canvas() {
@@ -193,51 +203,131 @@ $var title: GraPHOtti.
 			}
 		}
 
+		function snap_photo() {
+			let canvasOutput = document.getElementById("canvasOutput"); 
+			let base64Str = canvasOutput.toDataURL("image/png");
+			//base64Str = base64Str.replace('data:image/jpg;base64,','');
+			console.log(base64Str);
+			$$.post('photo', {
+				img: base64Str
+			});
+			var video = document.getElementById('video');
+			video.pause();
+			for (p in paths) {
+				paths[p].remove();
+				paths.splice(p,1);
+			}
+
+		}
+
+		function register_cv() {
+			cv['onRuntimeInitialized']=()=>{
+				console.log('opencv ready');
+				if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+					console.log('initialise video capture');
+					init_video();
+				} else {
+					console.log('no media device API available');
+				}
+			}
+		}
+
 		function init_video() {
 			var video = document.getElementById('video');
+			//console.log(navigator.mediaDevices.getSupportedConstraints());
+			// Not adding `{ audio: true }` since we only want video now
+			navigator.mediaDevices.getUserMedia({
+					video: {
+						facingMode: { ideal: 'environment'},
+						frameRate: { ideal: 5},
+						aspectRatio: { exact: 1},
+						width: {max: 600},
+						height: {max: 600}
+					},
+					audio: false
+			}).then(function(stream) {
+				const track = stream.getVideoTracks()[0];
+				let track_settings = track.getSettings();
+				let width = track_settings.width;
+				//video.width=width;
+				let height = track_settings.height;
+				let ratio = track_settings.aspectRatio;
+				//video.height=height;
+				console.log(width, height);
+				//Create image capture object and get camera capabilities
+				const imageCapture = new ImageCapture(track)
+				const photoCapabilities = imageCapture.getPhotoCapabilities().then(() => {
+					//let there be light!
+					const btn = document.querySelector('#torch');
 
-			// Get access to the camera!
-			cv['onRuntimeInitialized']=()=>{
-				if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-					// Not adding `{ audio: true }` since we only want video now
-					navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
-						//video.src = window.URL.createObjectURL(stream);
-						video.srcObject = stream;
-						//console.log(stream.getVideoTracks());
-						video.play();
-
-						let source = document.getElementById("video");
-						source.onplaying = function () {
-
-							let canvasFrame = document.getElementById("canvas"); // canvasFrame is the id of <canvas>
-							let context = canvasFrame.getContext("2d");
-
-							let ratio = canvasFrame.width / canvasFrame.height;
-							let height = source.videoWidth / ratio;
-							let yOffset = (source.videoHeight - height) / 2;
-							let width = source.videoWidth;
-
-							let src = new cv.Mat(height, width, cv.CV_8UC4);
-							let dst = new cv.Mat(height, width, cv.CV_8UC1);
-							const FPS = 10;
-							function processVideo() {
-								let begin = Date.now();
-								context.drawImage(video, 0, 0, width, height);
-								src.data.set(context.getImageData(0, 0, width, height).data);
-								cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
-								cv.Canny(src, dst, 50, 100, 3, false);
-								cv.imshow("canvasOutput", dst); // canvasOutput is the id of another <canvas>;
-								// schedule next one.
-								let delay = 1000/FPS - (Date.now() - begin);
-								setTimeout(processVideo, delay);
-							}
-							// schedule first one.
-							setTimeout(processVideo, 0);
-						};
+					btn.addEventListener('click', function(){
+						track.applyConstraints({
+							advanced: [{torch: btn.checked}]
+						});
 					});
+				});
+				video.srcObject = stream;
+				
+				// start the video
+				//video.play();
 
-				}		
-			}
+				video.onplaying = function () {
+					console.log('playing');
+					let canvasFrame = document.getElementById("canvas"); // canvasFrame is the id of <canvas>
+					let canvasOutput = document.getElementById("canvasOutput"); 
+					canvasOutput.onclick = function () {
+						if (video.paused) {
+							video.play();
+						} else {
+							video.pause();
+						}
+
+					};
+					let context = canvasFrame.getContext("2d");
+
+					//let ratio = width / height;
+					let mat_width = canvasOutput.width; //canvasFrame.width;
+					let mat_height = canvasOutput.height; //canvasFrame.width / ratio;
+					let mat_ratio_height = mat_width / ratio;
+
+					console.log(mat_width / ratio, mat_width, ratio);
+					const FPS = 5;
+					function processVideo() {
+						let begin = Date.now();
+						if (!video.paused) {
+							let dst = new cv.Mat(mat_height, mat_width, cv.CV_8UC1);
+							//let dst2 = new cv.Mat();
+							let src = new cv.Mat(mat_height, mat_width, cv.CV_8UC4);
+							//let src2 = new cv.Mat();
+							context.drawImage(video, 0, 0, mat_width, mat_ratio_height);
+							src.data.set(context.getImageData(
+								0, 0, 
+								mat_width, mat_ratio_height).data);
+							//cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+							cv.Canny(src, dst, 40, 120, 3, false);
+							//console.log(dst);
+							//cv.bitwise_or(src, src, dst2, dst);
+							src.delete();
+							//dst.delete();
+
+							//cv.bitwise_not(dst, dst);
+							cv.imshow("canvasOutput", dst); // canvasOutput is the id of another <canvas>;
+							dst.delete();
+						}
+						let delay = 1000/FPS - (Date.now() - begin);
+						setTimeout(processVideo, delay);
+					}
+					// schedule first one.
+					canvasOutput.hidden = false;
+					document.getElementById("canvasOutput_placeholder").hidden = true; 
+					setTimeout(processVideo, 0);
+				};
+
+			}).catch(function(err) {
+				console.log(err);
+			});;	
+				
+
 		}
 
 		window.onload = function() {
@@ -257,6 +347,9 @@ $var title: GraPHOtti.
 
 			with (paper) {
     		    maximise(view, "myCanvas");
+				var background = new paper.Layer();
+				var secondLayer = new paper.Layer();
+				secondLayer.activate();
 
 				// Create a simple drawing tool:
 				var tool = new Tool();
@@ -275,8 +368,7 @@ $var title: GraPHOtti.
 
 				// Define a mousedown and mousedrag handler
 				tool.onMouseDown = function(event) {
-					if (latitude == 0.0  && longitude == 0.0)
-						return;
+					secondLayer.activate();
 					path = new Path();
 					color = [	Math.random()*0.5 + 0.5,
 								Math.random()*0.5 + 0.5,
@@ -291,8 +383,7 @@ $var title: GraPHOtti.
 				}
 
 				tool.onMouseDrag = function(event) {
-					if (latitude == 0.0  && longitude == 0.0)
-						return;
+					secondLayer.activate();
 					p = event.point;
 					// p.x /= pixel_ratio;
 					// p.y /= pixel_ratio;
@@ -300,8 +391,7 @@ $var title: GraPHOtti.
 				}
 
 				tool.onMouseUp = function(event) {
-					if (latitude == 0.0  && longitude == 0.0)
-						return;
+					secondLayer.activate();
 					var data = {};
 					data['path'] = path.exportJSON();
 					data['zoom'] = zoom;
@@ -315,10 +405,6 @@ $var title: GraPHOtti.
 
 			    view.onFrame = function(event) {
 					// On each frame, rotate the path by 3 degrees:
-					if (geo_wait_text && latitude != 0.0 && longitude != 0.0) {
-						geo_wait_text.remove();
-						geo_wait_text = null;
-					}
 
 					for (p in paths) {
 						//console.log(paths[p].strokeColor);
@@ -345,6 +431,24 @@ $var title: GraPHOtti.
 			    }
 				maximise(view, "myCanvas");		
 
+			var photo_source = new EventSource("photo");
+			photo_source.onmessage = function(event) {
+				var d = JSON.parse(event.data);
+				console.log('photo received');
+				//if (view.photo) 
+					//view.photo.remove();
+				background.activate();
+				//let canvasOutput = document.getElementById("canvasOutput"); 
+				//canvasOutput.src = d['img']
+				view.photo = new Raster(d['img']);
+				view.photo.position = view.center;
+				view.photo.scale(zoom);
+				for (p in paths) {
+					paths[p].remove();
+					paths.splice(p,1);
+				}
+
+			}
 
 
 			}

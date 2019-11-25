@@ -2,6 +2,9 @@ import sys
 import os
 abspath = os.path.dirname(__file__)
 print abspath
+import cv2
+import numpy as np
+from base64 import b64decode
 
 if len(abspath) > 0:
     sys.path.append(abspath)
@@ -35,7 +38,8 @@ urls = (
     '/sse', 'SSEServer',
     '/view', 'view',
     '/acc', 'Acc',
-    '/about', 'about'
+    '/about', 'about',
+    '/photo', 'PhotoServer'
 )
 
 print(os.environ)
@@ -65,6 +69,7 @@ class Geofence():
 
 current_energy = 0.0
 gravities = []
+last_photo_base64 = None
 
 class Acc():
 
@@ -124,10 +129,52 @@ class Acc():
                 yield r
 
 class PhotoServer():
+    def response(self, data):
+        response = "data: " + data + "\n\n"
+        return response
 
     def POST(self):
-
+        global last_photo_base64
+        print('photopost')
+        i = web.input()
+        b64str = i['img']
+        new_photo_cond.acquire()
+        last_photo_base64 = b64str
+        # png_data = b64decode(b64str)
+        # image = np.asarray(bytearray(png_data), dtype="uint8")
+        # cv_image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+        # cv2.imwrite('out.png', cv_image)
+        try:
+            new_photo_cond.notifyAll()
+        finally:
+            new_photo_cond.release()
         return web.ok()
+
+    def GET(self):
+        global last_photo_base64
+        web.header("Content-Type", "text/event-stream")
+        web.header('Cache-Control', 'no-cache')
+        web.header('Content-length:', 0)
+        block = False
+
+        while is_running:
+            try:
+                new_photo_cond.acquire()
+                if block:
+                    new_photo_cond.wait(timeout=sys.maxint)
+                if last_photo_base64:
+                    e = dumps({
+                        'img': last_photo_base64
+                    })
+                else:
+                    e = None
+            finally:
+                new_photo_cond.release()
+            block = True
+            if e is not None:
+                r = self.response(str(e))
+                yield r
+
 
 class Tweeter():
 
@@ -228,6 +275,7 @@ else:
 
 new_path_cond = Condition()
 new_acc_cond = Condition()
+new_photo_cond = Condition()
 current_path = dumps({'path': [],
                      'dummy': range(1, 2048),  # data to stop proxy buffering
                       })

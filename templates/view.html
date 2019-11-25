@@ -24,6 +24,7 @@ canvas[resize] {
             <div  class="panel-body text-center" style="margin:0 auto; background: black; max-width: 100vmin; max-height: 100vmin">
               <canvas class="text-center" id="myCanvas" keepalive="true" resize="true" width="2600" height="2600" style="border:0px solid #333333;background: black;">
               </canvas>
+              <img id="canvasOutput"> </img>
             </div>
         $else:
             <div  class="panel-body text-center" style="margin:0 auto; max-width: 70vmin; max-height: 70vmin">
@@ -239,7 +240,11 @@ canvas[resize] {
                   newX = border_width;
                   border = true;
               }
-
+              if (view.photo && view.photo.getPixel((view.viewSize.width-flake.x) / zoom, flake.y / zoom).gray>0) {
+                newX = flake.x;
+                newY = flake.y;
+                border = true;
+              }
               // if (flake.y >= canvas.height || flake.y <= 0) {
               //     reset(flake);
               // }
@@ -250,7 +255,7 @@ canvas[resize] {
               flake.y = newY;
 
               if (border) {
-                  if (Math.random() > .995 ) {
+                  if (Math.random() > .999 ) {
                       reset(flake);
                   }
               }                  
@@ -388,6 +393,10 @@ canvas[resize] {
 
 
       $if master:
+
+          var background = new paper.Layer();
+          var secondLayer = new paper.Layer();
+          secondLayer.activate();
           snow_init();
 
           var acc_source = new EventSource("acc");
@@ -397,6 +406,14 @@ canvas[resize] {
             gravity = d['gravity_angle'];
           }
 
+          var photo_source = new EventSource("photo");
+          photo_source.onmessage = function(event) {
+            var d = JSON.parse(event.data);
+            console.log('photo received ' + event.data);
+            view.new_photo = d['img'];
+          }
+
+
       var source = new EventSource("sse");
       // text = new PointText(new Point(20, 20));
       // text.justification = 'left';
@@ -404,6 +421,8 @@ canvas[resize] {
       // text.fontSize = 24;
       // text.content = 'draw on your phone';
       source.onmessage = function(event) {
+        secondLayer.activate();
+
         var d = JSON.parse(event.data);
           maximise(view, "myCanvas");
           if (d['path'].length == 0)
@@ -439,6 +458,23 @@ canvas[resize] {
         //stars();
         $if master:
             snow();
+            if (view.new_photo) {
+              if (view.photo) 
+                view.photo.remove();
+              background.activate();
+              view.photo = new Raster(view.new_photo);
+              console.log(view.photo);
+              view.new_photo = null;
+              view.photo.position = view.center;
+              //view.photo.scale(zoom);
+              view.photo.scale(-zoom, zoom);
+              secondLayer.activate();
+              for (var p in paths) {
+                paths[p].remove();
+                paths.splice(p,1);
+              }
+            }
+
         var max_t = 0;
         for (var p in paths) {
           if (paths[p].strokeColor.alpha > max_t)
