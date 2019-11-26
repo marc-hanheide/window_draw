@@ -4,3 +4,4 @@
 *.pyc
 /images
 /logs
+.vscode/launch.json
