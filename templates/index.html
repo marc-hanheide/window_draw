@@ -155,7 +155,7 @@ $var title: GraPHOtti.
 		}
 
 		function tweet() {
-			$$.post('tweet', {});
+			$$.post(location.pathname + '/tweet', {});
 		}
 
 		function send_acc(a, t, gravity_angle) {
@@ -431,7 +431,7 @@ $var title: GraPHOtti.
 			    }
 				maximise(view, "myCanvas");		
 
-			var photo_source = new EventSource("photo");
+			var photo_source = new EventSource(location.pathname + "/photo");
 			photo_source.onmessage = function(event) {
 				var d = JSON.parse(event.data);
 				console.log('photo received');
