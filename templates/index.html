@@ -73,7 +73,7 @@ $var title: GraPHOtti.
 								<canvas hidden="true" id="canvasOutput" keepalive="true" width="600" height="600" resize="true" style="border:2px solid #555555;background: black;">
 								</canvas>
 								<h3 id="canvasOutput_placeholder">
-									If your camera is working, the video will soon show here. It can be a few more seconds...
+									If your phone is compatible with this software, the video will soon show here. It can be a few more seconds...
 								</h3>
 							</div>
 						</div>
@@ -248,6 +248,10 @@ $var title: GraPHOtti.
 			}
 		}
 
+		function info(info) {
+			document.getElementById("canvasOutput_placeholder").innerHTML=info;
+		}
+
 		function init_video() {
 			var video = document.getElementById('video');
 			//console.log(navigator.mediaDevices.getSupportedConstraints());
@@ -262,6 +266,7 @@ $var title: GraPHOtti.
 					},
 					audio: false
 			}).then(function(stream) {
+				info("Good news, your camera should be possible to use. initialising...");
 				const track = stream.getVideoTracks()[0];
 				let track_settings = track.getSettings();
 				let width = track_settings.width;
@@ -288,6 +293,8 @@ $var title: GraPHOtti.
 				//video.play();
 
 				video.onplaying = function () {
+					info("... getting a video stream, not long now...");
+
 					console.log('playing');
 					let canvasFrame = document.getElementById("canvas"); // canvasFrame is the id of <canvas>
 					let canvasOutput = document.getElementById("canvasOutput"); 
@@ -305,16 +312,17 @@ $var title: GraPHOtti.
 					let mat_width = canvasOutput.width; //canvasFrame.width;
 					let mat_height = canvasOutput.height; //canvasFrame.width / ratio;
 					let mat_ratio_height = mat_width / ratio;
+					let first_run = true;
 
 					console.log(mat_width / ratio, mat_width, ratio);
 					const FPS = 5;
 					function processVideo() {
+
 						let begin = Date.now();
 						if (!video.paused) {
+							if (first_run) info("... got video to process, hang tight...");
 							let dst = new cv.Mat(mat_height, mat_width, cv.CV_8UC1);
-							//let dst2 = new cv.Mat();
 							let src = new cv.Mat(mat_height, mat_width, cv.CV_8UC4);
-							//let src2 = new cv.Mat();
 							context.drawImage(video, 0, 0, mat_width, mat_ratio_height);
 							src.data.set(context.getImageData(
 								0, 0, 
@@ -325,6 +333,11 @@ $var title: GraPHOtti.
 							//cv.bitwise_or(src, src, dst2, dst);
 							src.delete();
 							//dst.delete();
+							if (first_run) {
+								canvasOutput.hidden = false;
+								document.getElementById("canvasOutput_placeholder").hidden = true; 
+								first_run = false;
+							}
 
 							//cv.bitwise_not(dst, dst);
 							cv.imshow("canvasOutput", dst); // canvasOutput is the id of another <canvas>;
@@ -334,12 +347,11 @@ $var title: GraPHOtti.
 						setTimeout(processVideo, delay);
 					}
 					// schedule first one.
-					canvasOutput.hidden = false;
-					document.getElementById("canvasOutput_placeholder").hidden = true; 
 					setTimeout(processVideo, 0);
 				};
 
 			}).catch(function(err) {
+				info("sorry, your phone's camera doesn't work for this");
 				console.log(err);
 			});;	
 				
@@ -349,7 +361,7 @@ $var title: GraPHOtti.
 		window.onload = function() {
 
 			init_imu();
-			init_video();
+			//init_video();
 
 			//getLocation();
 			//rewireLoggingToElement(
