@@ -208,7 +208,7 @@ $var title: GraPHOtti.
 			let base64Str = canvasOutput.toDataURL("image/png");
 			//base64Str = base64Str.replace('data:image/jpg;base64,','');
 			console.log(base64Str);
-			$$.post('photo', {
+			$$.post(location.pathname + '/photo', {
 				img: base64Str
 			});
 			var video = document.getElementById('video');
