@@ -289,54 +289,57 @@ class DrawPage:
     def POST(self):
         global current_path
         i = web.input()
-        p = loads(i['path'])
-        zoom = float(i['zoom'])
-        if 'latitude' in i:
-            latitude = float(i['latitude'])
-        else:
-            latitude = -1.0
-        if 'longitude' in i:
-            longitude = float(i['longitude'])
-        else:
-            longitude = -1.0
-
-        geo_location = (latitude, longitude)
-
-        #print latitude
-        #if not latitude < 0.0:
-        #    if not geo_fence.valid_position(geo_location):
-        #        return web.notacceptable()
-
-        #pixel_ratio = float(i['pixel_ratio'])
-        for s in p[1]['segments']:
-            s[0] /= (zoom)
-            s[1] /= (zoom)
-        new_path_cond.acquire()
         try:
-            env = {}
-            for (k, v) in web.ctx.env.items():
-                if type(v) is str:
-                    env[k] = v
-            d = {
-                'path': p,
-                'env': env,
-                'dummy': range(1, 2048),  # dummy data to stop proxy buffering
-            }
-            current_path = dumps(d)
-            new_path_cond.notifyAll()
-            # store relevant logs:
-            fname = abspath + '/logs/graphotti_%s.json' % str(datetime.now())
-            with open(fname, 'w') as f:
-                log_data = {
+            p = loads(i['path'])
+            zoom = float(i['zoom'])
+            if 'latitude' in i:
+                latitude = float(i['latitude'])
+            else:
+                latitude = -1.0
+            if 'longitude' in i:
+                longitude = float(i['longitude'])
+            else:
+                longitude = -1.0
+
+            geo_location = (latitude, longitude)
+
+            #print latitude
+            #if not latitude < 0.0:
+            #    if not geo_fence.valid_position(geo_location):
+            #        return web.notacceptable()
+
+            #pixel_ratio = float(i['pixel_ratio'])
+            for s in p[1]['segments']:
+                s[0] /= (zoom)
+                s[1] /= (zoom)
+            new_path_cond.acquire()
+            try:
+                env = {}
+                for (k, v) in web.ctx.env.items():
+                    if type(v) is str:
+                        env[k] = v
+                d = {
                     'path': p,
                     'env': env,
-                    'longitude': longitude,
-                    'latitude': latitude,
-                    'timestamp': str(datetime.now())
+                    'dummy': range(1, 2048),  # dummy data to stop proxy buffering
                 }
-                f.write(dumps(log_data))
-        finally:
-            new_path_cond.release()
+                current_path = dumps(d)
+                new_path_cond.notifyAll()
+                # store relevant logs:
+                fname = abspath + '/logs/graphotti_%s.json' % str(datetime.now())
+                with open(fname, 'w') as f:
+                    log_data = {
+                        'path': p,
+                        'env': env,
+                        'longitude': longitude,
+                        'latitude': latitude,
+                        'timestamp': str(datetime.now())
+                    }
+                    f.write(dumps(log_data))
+            finally:
+                new_path_cond.release()
+        except Exception as e:
+            raise
         return web.ok()
 
 

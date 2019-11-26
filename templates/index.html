@@ -15,9 +15,10 @@ $var title: GraPHOtti.
 		</nav>
  -->	
 		<ul class="nav nav-tabs">
-		  <li role="presentation" class="active"><a href="#draw">Doodle</a></li>
-		  <li role="presentation"><a href="/graphotti/about">About</a></li>
-		  <li role="presentation"><a href="#share">Share</a></li>
+			<li role="presentation" class="active"><a href="#canny">Snap</a></li>
+			<li role="presentation" class="active"><a href="#draw">Doodle</a></li>
+			<li role="presentation"><a href="/graphotti/about">About</a></li>
+			<li role="presentation" class="active"><a href="#share">Share</a></li>
 		</ul>
 
 		<div class="jumbotron jumbotron-fluid">
@@ -25,7 +26,7 @@ $var title: GraPHOtti.
 
 		  	<p><small>
 		  		A collaborative, creative "graffiti snow globe".
-		    	<b>Draw</b> on our window! <b>Turn</b> and <b>shake</b> your phone for a wintery snow storm.
+		    	Take an artistic sketchy <b>snap</b>; <b>draw</b> on our window; <b>turn</b> and <b>shake</b> your phone for a wintery snow storm.
 		    </small>
 		    </p>
 		</div>
@@ -38,14 +39,60 @@ $var title: GraPHOtti.
 		</style>
  		<div class="container">
 			<div class="row">
-				<div class="panel panel-default">
-				  	<div class="panel-heading">
-						<a name="draw" ></a>
-				    	<h3 class="panel-title">Draw here <small>(don't forget to turn and shack your phone, too!)</small></h3>
+				<div class="panel panel-info">
+					<a id="canny_anchor" name="canny"></a>
+					<div class="panel-heading">
+						<h3 class="panel-title"><span class="glyphicon glyphicon-camera"></span>&nbsp;Camera <small>if your phone supports it, you can post an artisitic photo on the window.</small></h3>
+					</div>
+					<div class="panel-body">
+						<video hidden id="video" width="600" height="600" autoplay></video>
+						<canvas hidden id="canvas" width="600" height="600"></canvas>
+						<div id="canvasOutput_placeholder">
+							<h3>Trying to access your camera.</h3>
+							
+							<p>If your phone is compatible with this software, a "sketchy" video will soon be shown here.</p> 
+							<p>If you are ask to give this website permission to access your camera, please do so for full experience.</p>
+							
+							<p>It can be a few more seconds...</p>
+							<p><small>If you don't see a video here soon, don't worry, you can still <a href="#draw">doodle</a> along on other people's shots.</small></p>
+						</div>
+						<div hidden="true" class="only_with_video" id="canvascontainer_video" style2="text-align:center">
+							<small>Take a nice shot, use the torch button to turn on the light of your phone (if supported).
+								Once you snapped your photo, <a href="#draw">doodle</a> on it below. 
+								If the video is stopped after a snap, simply touch it to go back to live view.
+							</small>
+							<div style="max-width: 100vmin; max-height: 100vmin">
+								<canvas id="canvasOutput" keepalive="true" 
+									width="600" height="600" resize="true" 
+									style="border:2px solid #555555;background: black;">
+								</canvas>
+							</div>
+						
+							<div class="btn-toolbar" role="toolbar">
+								<div class="btn-group">
+									<button type="button" class="btn btn-default" id="change_cam">
+										<span class="glyphicon glyphicon-refresh"></span>
+										Flip Camera</button>
+									<button type="button" id="snap"  class="btn btn-primary" onclick="snap_photo();">
+										<span class="glyphicon glyphicon-camera"></span>
+										Snap Photo</button>
+								</div>
+								<input id="torch"   type="checkbox" >
+									<span class="glyphicon glyphicon-phone"></span>
+									Use Torch <small>(if your phone supports it)</small></input>		
+							</div>
+						</div>
+					</div>				
+				</div>
+			</div>
+			<div class="row">
+				<div class="panel panel-success">
+					<a id="draw_anchor" name="draw"></a>
+					<div class="panel-heading">
+				    	<h3 class="panel-title"><span class="glyphicon glyphicon-pencil"></span>&nbsp;Draw here <small>(don't forget to turn and shack your phone, too!)</small></h3>
 				  	</div>
 				  	<div class="panel-body text-center">
-						<a name="draw"></a>
-						<button type="button" class="btn btn-success btn-block" onclick="fullscreen_canvas();">Go fullscreen!</button>
+						<!-- <button type="button" class="btn btn-success btn-block" onclick="fullscreen_canvas();">Go fullscreen!</button> -->
 
 					    <div id="canvascontainer" style="text-align:center">
 					    	<div style="max-width: 100vmin; max-height: 100vmin">
@@ -53,33 +100,7 @@ $var title: GraPHOtti.
 								</canvas>
 							</div>
 						</div>
-						<a type="button" class="btn btn-warning btn-block" href="/graphotti/image_store"><h3>View current window</h3> <img src="/graphotti/image_store" width="50px" /></a>
-
-					</div>				
-				</div>
-			</div>
-			<div class="row">
-				<div class="panel panel-default">
-				  	<div class="panel-heading">
-						<a name="draw" ></a>
-				    	<h3 class="panel-title">Canny</h3>
-				  	</div>
-				  	<div class="panel-body text-center">
-						<a name="canny"></a>
-						<video hidden id="video" width="600" height="600" autoplay></video>
-						<canvas hidden id="canvas" width="600" height="600"></canvas>
-					    <div id="canvascontainer" style="text-align:center">
-					    	<div style="max-width: 100vmin; max-height: 100vmin">
-								<canvas hidden="true" id="canvasOutput" keepalive="true" width="600" height="600" resize="true" style="border:2px solid #555555;background: black;">
-								</canvas>
-								<h3 id="canvasOutput_placeholder">
-									If your phone is compatible with this software, the video will soon show here. It can be a few more seconds...
-								</h3>
-							</div>
-						</div>
-						<input id="torch"   type="checkbox" >Torch</input>
-						<button type="button" class="btn" id="change_cam">Change Camera</button>
-						<button type="button" id="snap"  class="btn" onclick="snap_photo();">Snap Photo</button>
+						<p><small>Go back to <a href="#canny">take another shot</a>.</small></p>
 					</div>				
 				</div>
 			</div>
@@ -91,26 +112,11 @@ $var title: GraPHOtti.
 				  	</div>
 				  	<div class="panel-body">
 						<a name="share"></a>
-						<button type="button" class="btn btn-primary btn-block" onclick="tweet();">Tweet current doodle on @graPH0tti</button>
+						<a target="_blank" type="button" class="btn btn-warning btn-block" href="/graphotti/image_store">
+							<span class="glyphicon glyphicon-eye-open"></span>&nbsp; View current window</a>
+						<button type="button" class="btn btn-primary btn-block" onclick="tweet();">
+							<span class="glyphicon glyphicon-share"></span>&nbsp; Tweet current window directly on @graPH0tti</button>
 					</div>
-<!-- 				  	<div class="panel-body">
-
-
-						<div class="fb-like" data-href="https://lcas.lincoln.ac.uk/graphotti/about" data-layout="standard" data-action="like" data-show-faces="false" data-share="true"></div>
-
-				  		<a href="https://twitter.com/graPH0tti" class="twitter-follow-button" data-show-count="false" data-size="large" data-dnt="true">Follow @graPH0tti</a>
-						<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-
-						<a href="https://twitter.com/intent/tweet?screen_name=graPH0tti&text=%23westendlights" class="twitter-mention-button" data-size="large" data-related="graPH0tti,WestEndLights" data-dnt="true">Tweet to @graPH0tti</a>
-						<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-
-					</div>
-					<div class="panel-body">
-						<a class="twitter-timeline" data-dnt="true" href="https://twitter.com/graPH0tti" data-widget-id="664420268740354048">Tweets by @graPH0tti</a>
-						<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>				
-
-					</div>
--->
 				</div>
  
 
@@ -122,19 +128,6 @@ $var title: GraPHOtti.
 				</div>
 	
 			</div> -->
-
-			<!-- 
-			<div class="row">
-				<div class="panel panel-default">
-					<div class="panel-heading">
-						<h3 class="panel-title">Where you are</h3>
-					</div>
-					<div class="panel-body">
-						<div id="mapholder"><H3>GraPHOtti needs to know your location to make sure you are close to our Window before you are allowed to draw.</H3></div>
-					</div>
-				</div>
-			</div>
- -->
 		</div>
 
 
@@ -212,12 +205,15 @@ $var title: GraPHOtti.
 		}
 
 		function clean_url(suffix) {
-			let href = location.href;
-			if (href.endsWith("/")) {
-				return href+suffix;
+			let pathname = location.pathname;
+			let r = '';
+			if (pathname.endsWith("/")) {
+				r = pathname+suffix;
 			} else {
-				return href+'/'+suffix;
+				r = pathname+'/'+suffix;
 			}
+			console.log('path: ' + r)
+			return r;
 		}
 
 		function snap_photo() {
@@ -234,6 +230,7 @@ $var title: GraPHOtti.
 				paths[p].remove();
 			}
 			paths.length = 0;
+			document.getElementById('draw_anchor').scrollIntoView();
 		}
 
 		function register_cv() {
@@ -334,17 +331,17 @@ $var title: GraPHOtti.
 							src.delete();
 							//dst.delete();
 							if (first_run) {
-								canvasOutput.hidden = false;
-								document.getElementById("canvasOutput_placeholder").hidden = true; 
+								$$('.only_with_video').show();
+								$$('#canvasOutput_placeholder').hide(); 
 								first_run = false;
 							}
 
 							//cv.bitwise_not(dst, dst);
 							cv.imshow("canvasOutput", dst); // canvasOutput is the id of another <canvas>;
 							dst.delete();
-						}
-						let delay = 1000/FPS - (Date.now() - begin);
-						setTimeout(processVideo, delay);
+							let delay = 1000/FPS - (Date.now() - begin);
+							setTimeout(processVideo, delay);
+						} 
 					}
 					// schedule first one.
 					setTimeout(processVideo, 0);
