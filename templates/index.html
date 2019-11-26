@@ -115,7 +115,15 @@ $var title: GraPHOtti.
  
 
 			</div>
-<!-- 
+			<!-- <div class="row">
+
+				<div id="log-container">
+					<pre id="log"></pre>
+				</div>
+	
+			</div> -->
+
+			<!-- 
 			<div class="row">
 				<div class="panel panel-default">
 					<div class="panel-heading">
@@ -336,6 +344,10 @@ $var title: GraPHOtti.
 			init_video();
 
 			//getLocation();
+			//rewireLoggingToElement(
+			//	() => document.getElementById("log"),
+			//	() => document.getElementById("log-container"), true);
+
 
 
 			// Get a reference to the canvas object
@@ -431,7 +443,8 @@ $var title: GraPHOtti.
 			    }
 				maximise(view, "myCanvas");		
 
-			var photo_source = new EventSource(location.pathname + "/photo");
+			console.log(location);
+			var photo_source = new EventSource(location.href + "photo");
 			photo_source.onmessage = function(event) {
 				var d = JSON.parse(event.data);
 				console.log('photo received');
