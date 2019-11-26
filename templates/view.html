@@ -471,8 +471,8 @@ canvas[resize] {
               secondLayer.activate();
               for (var p in paths) {
                 paths[p].remove();
-                paths.splice(p,1);
               }
+              paths.length = 0;
             }
 
         var max_t = 0;

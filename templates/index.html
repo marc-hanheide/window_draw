@@ -215,9 +215,8 @@ $var title: GraPHOtti.
 			video.pause();
 			for (p in paths) {
 				paths[p].remove();
-				paths.splice(p,1);
 			}
-
+			paths.length = 0;
 		}
 
 		function register_cv() {
@@ -445,9 +444,8 @@ $var title: GraPHOtti.
 				view.photo.scale(zoom);
 				for (p in paths) {
 					paths[p].remove();
-					paths.splice(p,1);
 				}
-
+				paths.length = 0;
 			}
 
 
