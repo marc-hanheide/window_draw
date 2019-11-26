@@ -24,7 +24,14 @@ $def with (page, vars=None)
 		  js.src = "//connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v2.5";
 		  fjs.parentNode.insertBefore(js, fjs);
 		}(document, 'script', 'facebook-jssdk'));</script>
-		
+		<style>
+		.log-warn { color: orange }
+		.log-error { color: red }
+		.log-info { color: skyblue }
+		.log-log { color: rgb(58, 58, 58) }
+
+		.log-warn, .log-error { font-weight: bold; }
+		</style>
 		<link href="/static/css/style.css" rel="stylesheet" />
 	 	<script type="text/javascript">
 
@@ -36,6 +43,45 @@ $def with (page, vars=None)
 			latitude = 0.0;
 			longitude = 0.0;
 			var URL_PATH = location.pathname;
+
+
+		function rewireLoggingToElement(eleLocator, eleOverflowLocator, autoScroll) {
+			fixLoggingFunc('log');
+			fixLoggingFunc('debug');
+			fixLoggingFunc('warn');
+			fixLoggingFunc('error');
+			fixLoggingFunc('info');
+
+			function fixLoggingFunc(name) {
+				console['old' + name] = console[name];
+				console[name] = function(...arguments) {
+					const output = produceOutput(name, arguments);
+					const eleLog = eleLocator();
+
+					if (autoScroll) {
+						const eleContainerLog = eleOverflowLocator();
+						const isScrolledToBottom = eleContainerLog.scrollHeight - eleContainerLog.clientHeight <= eleContainerLog.scrollTop + 1;
+						eleLog.innerHTML += output + "<br>";
+						if (isScrolledToBottom) {
+							eleContainerLog.scrollTop = eleContainerLog.scrollHeight - eleContainerLog.clientHeight;
+						}
+					} else {
+						eleLog.innerHTML += output + "<br>";
+					}
+
+					console['old' + name].apply(undefined, arguments);
+				};
+			}
+
+			function produceOutput(name, args) {
+				return args.reduce((output, arg) => {
+					return output +
+						"<span class=\"log-" + (typeof arg) + " log-" + name + "\">" +
+							(typeof arg === "object" && (JSON || {}).stringify ? JSON.stringify(arg) : arg) +
+						"</span>&nbsp;";
+				}, '');
+			}
+		}
 
 
 			function showPosition(mapholder_div, latitude, longitude) {
