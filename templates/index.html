@@ -163,11 +163,11 @@ $var title: GraPHOtti.
 		}
 
 		function tweet() {
-			$$.post(location.pathname + '/tweet', {});
+			$$.post(location.href + 'tweet', {});
 		}
 
 		function send_acc(a, t, gravity_angle) {
-			$$.post(location.pathname + '/acc', {
+			$$.post(location.href + 'acc', {
 				'acc_abs': a,
 				'acc_time': t,
 				'gravity_angle': gravity_angle
@@ -216,7 +216,7 @@ $var title: GraPHOtti.
 			let base64Str = canvasOutput.toDataURL("image/png");
 			//base64Str = base64Str.replace('data:image/jpg;base64,','');
 			console.log(base64Str);
-			$$.post(location.pathname + '/photo', {
+			$$.post(location.href + 'photo', {
 				img: base64Str
 			});
 			var video = document.getElementById('video');
