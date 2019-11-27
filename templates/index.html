@@ -42,7 +42,7 @@ $var title: GraPHOtti.
 				<div class="panel panel-info">
 					<a id="canny_anchor" name="canny"></a>
 					<div class="panel-heading">
-						<h3 class="panel-title"><span class="glyphicon glyphicon-camera"></span>&nbsp;Camera <small>if your phone supports it, you can post an artisitic photo on the window.</small></h3>
+						<a href="#canny"><h3 class="panel-title"><span class="glyphicon glyphicon-camera"></span>&nbsp;Camera <small>if your phone supports it, you can post an artisitic photo on the window.</small></h3></a>
 					</div>
 					<div class="panel-body">
 						<video hidden id="video" width="600" height="600" autoplay></video>
@@ -55,6 +55,11 @@ $var title: GraPHOtti.
 							
 							<p>It can be a few more seconds...</p>
 							<p><small>If you don't see a video here soon, don't worry, you can still <a href="#draw">doodle</a> along on other people's shots.</small></p>
+							<div class="progress">
+								<div id="progress" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 20%;">
+									Initialising...
+								</div>
+							</div>
 						</div>
 						<div hidden="true" class="only_with_video" id="canvascontainer_video" style2="text-align:center">
 							<small>Take a nice shot, use the torch button to turn on the light of your phone (if supported).
@@ -70,16 +75,16 @@ $var title: GraPHOtti.
 						
 							<div class="btn-toolbar" role="toolbar">
 								<div class="btn-group">
-									<button type="button" class="btn btn-default" id="change_cam">
+									<!-- <button type="button" class="btn btn-default" id="change_cam">
 										<span class="glyphicon glyphicon-refresh"></span>
-										Flip Camera</button>
+										Flip Camera</button> -->
 									<button type="button" id="snap"  class="btn btn-primary" onclick="snap_photo();">
 										<span class="glyphicon glyphicon-camera"></span>
 										Snap Photo</button>
-								</div>
-								<input id="torch"   type="checkbox" >
+								</div>&nbsp;
+								<input hidden id="torch" type="checkbox" >
 									<span class="glyphicon glyphicon-phone"></span>
-									Use Torch <small>(if your phone supports it)</small></input>		
+								Use Torch </input>
 							</div>
 						</div>
 					</div>				
@@ -89,7 +94,7 @@ $var title: GraPHOtti.
 				<div class="panel panel-success">
 					<a id="draw_anchor" name="draw"></a>
 					<div class="panel-heading">
-				    	<h3 class="panel-title"><span class="glyphicon glyphicon-pencil"></span>&nbsp;Draw here <small>(don't forget to turn and shack your phone, too!)</small></h3>
+						<a href="#draw"><h3 class="panel-title"><span class="glyphicon glyphicon-pencil"></span>&nbsp;Draw here <small>(don't forget to turn and shack your phone, too!)</small></h3></a>
 				  	</div>
 				  	<div class="panel-body text-center">
 						<!-- <button type="button" class="btn btn-success btn-block" onclick="fullscreen_canvas();">Go fullscreen!</button> -->
@@ -100,7 +105,7 @@ $var title: GraPHOtti.
 								</canvas>
 							</div>
 						</div>
-						<p><small>Go back to <a href="#canny">take another shot</a>.</small></p>
+						<p>Go back to <b><a onclick="new_shot();">take another shot</b></a>.</p>
 					</div>				
 				</div>
 			</div>
@@ -127,7 +132,7 @@ $var title: GraPHOtti.
 					<pre id="log"></pre>
 				</div>
 	
-			</div> -->
+			</div>  -->
 		</div>
 
 
@@ -136,6 +141,16 @@ $var title: GraPHOtti.
 
 	<script type="text/javascript">
 
+		function progress(value, text) {
+			$$('#progress').css("width", value.toString()+"%");
+			$$('#progress').html(text);
+      	};
+
+		function new_shot() {
+			var video = document.getElementById('video');
+			video.play();
+			document.getElementById('canny_anchor').scrollIntoView();
+		}
 
 		function fullscreen_canvas() {
             var el = document.getElementById('canvascontainer');
@@ -236,6 +251,7 @@ $var title: GraPHOtti.
 		function register_cv() {
 			cv['onRuntimeInitialized']=()=>{
 				console.log('opencv ready');
+				progress(30, "CV ready");
 				if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
 					console.log('initialise video capture');
 					init_video();
@@ -253,6 +269,7 @@ $var title: GraPHOtti.
 			var video = document.getElementById('video');
 			//console.log(navigator.mediaDevices.getSupportedConstraints());
 			// Not adding `{ audio: true }` since we only want video now
+			progress(40, "Check Permission");
 			navigator.mediaDevices.getUserMedia({
 					video: {
 						facingMode: { ideal: 'environment'},
@@ -263,7 +280,8 @@ $var title: GraPHOtti.
 					},
 					audio: false
 			}).then(function(stream) {
-				info("Good news, your camera should be possible to use. initialising...");
+				//info("Good news, your camera should be possible to use. initialising...");
+				progress(50, "Video stream ready");
 				const track = stream.getVideoTracks()[0];
 				let track_settings = track.getSettings();
 				let width = track_settings.width;
@@ -271,13 +289,12 @@ $var title: GraPHOtti.
 				let height = track_settings.height;
 				let ratio = track_settings.aspectRatio;
 				//video.height=height;
-				console.log(width, height);
 				//Create image capture object and get camera capabilities
 				const imageCapture = new ImageCapture(track)
-				const photoCapabilities = imageCapture.getPhotoCapabilities().then(() => {
+				const photoCapabilities = imageCapture.getPhotoCapabilities().then(photoCapabilities => {
 					//let there be light!
 					const btn = document.querySelector('#torch');
-
+					$$('#torch').show();
 					btn.addEventListener('click', function(){
 						track.applyConstraints({
 							advanced: [{torch: btn.checked}]
@@ -290,7 +307,8 @@ $var title: GraPHOtti.
 				//video.play();
 
 				video.onplaying = function () {
-					info("... getting a video stream, not long now...");
+					//info("... getting a video stream, not long now...");
+					progress(70, "camera is streaming");
 
 					console.log('playing');
 					let canvasFrame = document.getElementById("canvas"); // canvasFrame is the id of <canvas>
@@ -317,7 +335,7 @@ $var title: GraPHOtti.
 
 						let begin = Date.now();
 						if (!video.paused) {
-							if (first_run) info("... got video to process, hang tight...");
+							if (first_run) progress(90, "... got video to process, hang tight...");
 							let dst = new cv.Mat(mat_height, mat_width, cv.CV_8UC1);
 							let src = new cv.Mat(mat_height, mat_width, cv.CV_8UC4);
 							context.drawImage(video, 0, 0, mat_width, mat_ratio_height);
@@ -334,6 +352,7 @@ $var title: GraPHOtti.
 								$$('.only_with_video').show();
 								$$('#canvasOutput_placeholder').hide(); 
 								first_run = false;
+								document.getElementById('canny_anchor').scrollIntoView();
 							}
 
 							//cv.bitwise_not(dst, dst);
@@ -361,9 +380,9 @@ $var title: GraPHOtti.
 			//init_video();
 
 			//getLocation();
-			//rewireLoggingToElement(
-			//	() => document.getElementById("log"),
-			//	() => document.getElementById("log-container"), true);
+			// rewireLoggingToElement(
+			// 	() => document.getElementById("log"),
+			// 	() => document.getElementById("log-container"), true);
 
 
 
@@ -372,7 +391,7 @@ $var title: GraPHOtti.
 			// Create an empty project and a view for the canvas:
 			paper.setup(canvas);
 
-
+			document.getElementById('canny_anchor').scrollIntoView();
 
 			with (paper) {
     		    maximise(view, "myCanvas");
