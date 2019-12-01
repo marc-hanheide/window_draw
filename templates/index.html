@@ -45,7 +45,7 @@ $var title: GraPHOtti.
 						<a href="#canny"><h3 class="panel-title"><span class="glyphicon glyphicon-camera"></span>&nbsp;Camera <small>if your phone supports it, you can post an artisitic photo on the window.</small></h3></a>
 					</div>
 					<div class="panel-body">
-						<video hidden id="video" width="600" height="600" autoplay></video>
+						<video hidden id="video" width="600" height="600"></video>
 						<canvas hidden id="canvas" width="600" height="600"></canvas>
 						<div id="canvasOutput_placeholder">
 							<h3>Trying to access your camera.</h3>
@@ -62,7 +62,7 @@ $var title: GraPHOtti.
 							</div>
 						</div>
 						<div hidden="true" class="only_with_video" id="canvascontainer_video" style2="text-align:center">
-							<small>Take a nice shot, use the torch button to turn on the light of your phone (if supported).
+							<small>Take a nice shot! <span hidden class="only-with-torch" id="torch">Use the torch button (<span class="glyphicon glyphicon-phone"></span>) to turn on the light of your phone (if supported). </span>
 								Once you snapped your photo, <a href="#draw">doodle</a> on it below. 
 								If the video is stopped after a snap, simply touch it to go back to live view.
 							</small>
@@ -82,9 +82,9 @@ $var title: GraPHOtti.
 										<span class="glyphicon glyphicon-camera"></span>
 										Snap Photo</button>
 								</div>&nbsp;
-								<input hidden id="torch" type="checkbox" >
+								<div class="btn-group"><div class="only-with-torch" hidden id="torch" ></span><input  type="checkbox" >
 									<span class="glyphicon glyphicon-phone"></span>
-								Use Torch </input>
+								Use Torch </input></div></div>
 							</div>
 						</div>
 					</div>				
@@ -235,7 +235,7 @@ $var title: GraPHOtti.
 			let canvasOutput = document.getElementById("canvasOutput"); 
 			let base64Str = canvasOutput.toDataURL("image/png");
 			//base64Str = base64Str.replace('data:image/jpg;base64,','');
-			console.log(base64Str);
+			//console.log(base64Str);
 			$$.post(clean_url('photo'), {
 				img: base64Str
 			});
@@ -274,9 +274,9 @@ $var title: GraPHOtti.
 					video: {
 						facingMode: { ideal: 'environment'},
 						frameRate: { ideal: 5},
-						aspectRatio: { exact: 1},
-						width: {max: 600},
-						height: {max: 600}
+						aspectRatio: { ideal: 1},
+						width: {max: 900},
+						height: {ideal: 600, max: 600}
 					},
 					audio: false
 			}).then(function(stream) {
@@ -285,26 +285,31 @@ $var title: GraPHOtti.
 				const track = stream.getVideoTracks()[0];
 				let track_settings = track.getSettings();
 				let width = track_settings.width;
-				//video.width=width;
+				video.width=width;
 				let height = track_settings.height;
 				let ratio = track_settings.aspectRatio;
-				//video.height=height;
+				video.height=height;
 				//Create image capture object and get camera capabilities
-				const imageCapture = new ImageCapture(track)
-				const photoCapabilities = imageCapture.getPhotoCapabilities().then(photoCapabilities => {
-					//let there be light!
-					const btn = document.querySelector('#torch');
-					$$('#torch').show();
-					btn.addEventListener('click', function(){
-						track.applyConstraints({
-							advanced: [{torch: btn.checked}]
+				try {
+					const imageCapture = new ImageCapture(track);
+					const photoCapabilities = imageCapture.getPhotoCapabilities().then(photoCapabilities => {
+						//let there be light!
+						const btn = document.querySelector('#torch');
+						$$('.only-with-torch').show();
+						btn.addEventListener('click', function(){
+							track.applyConstraints({
+								advanced: [{torch: btn.checked}]
+							});
 						});
 					});
-				});
+				}
+				catch (e) {
+					console.log(e);
+				}
 				video.srcObject = stream;
 				
 				// start the video
-				//video.play();
+				video.play();
 
 				video.onplaying = function () {
 					//info("... getting a video stream, not long now...");
@@ -323,13 +328,13 @@ $var title: GraPHOtti.
 					};
 					let context = canvasFrame.getContext("2d");
 
-					//let ratio = width / height;
+					let ratio = width / height;
 					let mat_width = canvasOutput.width; //canvasFrame.width;
 					let mat_height = canvasOutput.height; //canvasFrame.width / ratio;
 					let mat_ratio_height = mat_width / ratio;
 					let first_run = true;
 
-					console.log(mat_width / ratio, mat_width, ratio);
+					console.log(mat_ratio_height, mat_width, ratio);
 					const FPS = 5;
 					function processVideo() {
 
@@ -341,7 +346,7 @@ $var title: GraPHOtti.
 							context.drawImage(video, 0, 0, mat_width, mat_ratio_height);
 							src.data.set(context.getImageData(
 								0, 0, 
-								mat_width, mat_ratio_height).data);
+								mat_width, mat_height).data);
 							//cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
 							cv.Canny(src, dst, 40, 120, 3, false);
 							//console.log(dst);
