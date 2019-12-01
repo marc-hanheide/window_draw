@@ -78,7 +78,7 @@ $var title: GraPHOtti.
 									<!-- <button type="button" class="btn btn-default" id="change_cam">
 										<span class="glyphicon glyphicon-refresh"></span>
 										Flip Camera</button> -->
-									<button type="button" id="snap"  class="btn btn-primary" onclick="snap_photo();">
+									<button type="button" id="snap"  class="btn btn-primary" onclick="snap_photo(false);">
 										<span class="glyphicon glyphicon-camera"></span>
 										Snap Photo</button>
 								</div>&nbsp;
@@ -86,6 +86,20 @@ $var title: GraPHOtti.
 									<span class="glyphicon glyphicon-phone"></span>
 								Use Torch </input></div></div>
 							</div>
+						</div>
+						<div>
+							<h3>Past Snaps <small>(click to reuse)</small></h3>
+							<table class="table">
+								<tr>
+									$for h in range(0,4):
+										<td>
+											<img 
+												class="img-responsive" id="hist_$h" src=""
+												onclick="click_history(this);"
+												>
+										</td>
+								</tr>
+							</table>
 						</div>
 					</div>				
 				</div>
@@ -183,6 +197,38 @@ $var title: GraPHOtti.
 		}
 
 
+		function update_history() {
+			$$.get(clean_url('history?len=4'), function (json) {
+				let hist = json['files'];
+				for(f in hist) {
+					let url = clean_url(hist[f]);
+					console.log(url);
+					$$('#hist_'+f.toString()).attr("src", url);
+				}
+			});
+		}
+
+		function click_history(img) {
+			let canvasOutput = document.getElementById("canvasOutput"); 
+			let context = canvasOutput.getContext('2d');
+			let base64Str = canvasOutput.toDataURL("image/png");
+			//base64Str = base64Str.replace('data:image/jpg;base64,','');
+			//console.log(base64Str);
+			let video = document.getElementById('video');
+			video.pause();
+			console.log(img);
+			let base_image = new Image();
+			base_image.src = img.src;
+  			base_image.onload = function() {
+				console.log('draw ' + base_image.width);
+    			context.drawImage(base_image, 0, 0, base_image.width, base_image.height);
+				snap_photo(true);
+  			}
+			//document.getElementById('draw_anchor').scrollIntoView();
+		}
+
+
+
 		function init_imu() {
 			acc_abs = 0.0;
 			acc_time = 0.0;
@@ -227,17 +273,17 @@ $var title: GraPHOtti.
 			} else {
 				r = pathname+'/'+suffix;
 			}
-			console.log('path: ' + r)
 			return r;
 		}
 
-		function snap_photo() {
+		function snap_photo(from_hist) {
 			let canvasOutput = document.getElementById("canvasOutput"); 
 			let base64Str = canvasOutput.toDataURL("image/png");
 			//base64Str = base64Str.replace('data:image/jpg;base64,','');
 			//console.log(base64Str);
 			$$.post(clean_url('photo'), {
-				img: base64Str
+				img: base64Str,
+				from_hist: from_hist
 			});
 			var video = document.getElementById('video');
 			video.pause();
@@ -382,6 +428,7 @@ $var title: GraPHOtti.
 		window.onload = function() {
 
 			init_imu();
+			update_history();
 			//init_video();
 
 			//getLocation();
@@ -501,6 +548,7 @@ $var title: GraPHOtti.
 					paths[p].remove();
 				}
 				paths.length = 0;
+				update_history();
 			}
 
 

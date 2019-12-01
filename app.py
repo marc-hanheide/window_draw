@@ -1,5 +1,6 @@
 import sys
 import os
+from glob import glob
 abspath = os.path.dirname(__file__)
 print abspath
 import cv2
@@ -33,6 +34,7 @@ from geopy.distance import vincenty
 urls = (
     '/', 'index',
     '/simple', 'index_simple',
+    '/history(.*)', 'history',
     '/image_store', 'image_store',
     '/tweet', 'tweet',
     '/sse', 'SSEServer',
@@ -135,12 +137,15 @@ class PhotoServer():
 
     def POST(self):
         global last_photo_base64
-        print('photopost')
         i = web.input()
         b64str = i['img']
+        from_hist = (i['from_hist'] == "true")
+        print('photopost ' + str(from_hist))
         new_photo_cond.acquire()
         last_photo_base64 = b64str
-        # png_data = b64decode(b64str)
+        if not from_hist:
+            history.store(b64str)
+
         # image = np.asarray(bytearray(png_data), dtype="uint8")
         # cv_image = cv2.imdecode(image, cv2.IMREAD_COLOR)
         # cv2.imwrite('out.png', cv_image)
@@ -401,6 +406,67 @@ class image_store:
             # web.header('Content-disposition',
             #            'attachment; filename=graphotti.png')
             return last_snapshot['blob']
+
+    def POST(self):
+        global last_snapshot
+        i = web.input()
+        image_in = StringIO()
+        image_in.write(i['data'])
+        image_in.seek(0)
+
+        img = Image.open(image_in)
+        if config.config['mirror']:
+            img_flipped = img.transpose(Image.FLIP_LEFT_RIGHT)
+        else:
+            img_flipped = img
+
+        image_out = StringIO()
+        img_flipped.save(image_out, 'jpeg')
+        i['data'] = image_out.getvalue()
+
+        fname = abspath + '/images/graphotti_%s.jpg' % str(datetime.now())
+        with open(fname, 'w') as f:
+            f.write(i['data'])
+        last_snapshot = {
+            'fname': fname,
+            'blob': i['data']
+        }
+        return web.ok()
+
+class history:
+
+    @staticmethod
+    def store(b64str):
+        clean_b64 = b64str.replace('data:image/png;base64,','')
+        png_data = b64decode(clean_b64)
+        #image_in = StringIO()
+        #image_in.write(png_data)
+        #image_in.seek(0)
+
+        #img = Image.open(image_in)
+        fname = abspath + '/images/history_%s.png' % str(datetime.now())
+        with open(fname, 'w') as f:
+            f.write(png_data)
+
+    def GET(self, fname):
+        i = web.input(len='')
+        if len(i.len) > 0:
+            history_len = int(i.len)
+            glob_pat = abspath + '/images/history_*.png'
+            hist_files = glob(glob_pat)
+            sorted_files = sorted(hist_files, key=os.path.getctime, reverse=True)
+            res = {
+                'files': [('history/' + os.path.basename(f)) for f in sorted_files[:history_len]]
+            }
+            web.header('Content-Type', 'application/json')  # file type
+            return dumps(res)
+        elif fname:
+            p = '%s/images/%s' % (abspath, str(fname))
+            img = Image.open(p)
+            image_out = StringIO()
+            img.save(image_out, 'png')
+            web.header('Content-Type', 'image/png')  # file type
+            return image_out.getvalue()
 
     def POST(self):
         global last_snapshot
