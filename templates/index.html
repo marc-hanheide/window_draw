@@ -62,7 +62,7 @@ $var title: GraPHOtti.
 							</div>
 						</div>
 						<div hidden="true" class="only_with_video" id="canvascontainer_video" style2="text-align:center">
-							<small>Take a nice shot! <span hidden class="only-with-torch" id="torch">Use the torch button (<span class="glyphicon glyphicon-phone"></span>) to turn on the light of your phone (if supported). </span>
+							<small>Take a nice shot! <span hidden class="only-with-torch">Use the torch button (<span class="glyphicon glyphicon-phone"></span>) to turn on the light of your phone (if supported). </span>
 								Once you snapped your photo, <a href="#draw">doodle</a> on it below. 
 								If the video is stopped after a snap, simply touch it to go back to live view.
 							</small>
@@ -82,13 +82,14 @@ $var title: GraPHOtti.
 										<span class="glyphicon glyphicon-camera"></span>
 										Snap Photo</button>
 								</div>&nbsp;
-								<div class="btn-group"><div class="only-with-torch" hidden id="torch" ></span><input  type="checkbox" >
+								<div class="btn-group"><div class="only-with-torch" hidden  ></span><input id="torch" type="checkbox" >
 									<span class="glyphicon glyphicon-phone"></span>
 								Use Torch </input></div></div>
 							</div>
 						</div>
 						<div>
-							<h3>Past Snaps <small>(click to reuse)</small></h3>
+							<a id="history" name="history"></a>
+							<h3>Recent snaps <small>(click to reuse)</small></h3>
 							<table class="table">
 								<tr>
 									$for h in range(0,4):
@@ -119,7 +120,7 @@ $var title: GraPHOtti.
 								</canvas>
 							</div>
 						</div>
-						<p>Go back to <b><a onclick="new_shot();">take another shot</b></a>.</p>
+						<p>Go back to <b><a onclick="new_shot();">take another snap</a></b> or <b><a onclick="new_from_history();">choose from previous ones</a></b>.</p>
 					</div>				
 				</div>
 			</div>
@@ -164,6 +165,12 @@ $var title: GraPHOtti.
 			var video = document.getElementById('video');
 			video.play();
 			document.getElementById('canny_anchor').scrollIntoView();
+		}
+
+		function new_from_history() {
+			var video = document.getElementById('video');
+			video.pause();
+			document.getElementById('history').scrollIntoView();
 		}
 
 		function fullscreen_canvas() {
@@ -295,6 +302,7 @@ $var title: GraPHOtti.
 		}
 
 		function register_cv() {
+			update_history();
 			cv['onRuntimeInitialized']=()=>{
 				console.log('opencv ready');
 				progress(30, "CV ready");
@@ -418,7 +426,7 @@ $var title: GraPHOtti.
 				};
 
 			}).catch(function(err) {
-				info("sorry, your phone's camera doesn't work for this");
+				info('Sorry, your phone\'s camera doesn\'t work for this. Maybe you didn\'t allow this website to access your camera or your phone/browser doesn\'t support camera access? You can still choose a <a href="#history">previous snap</a> or just <a href="#draw">doodle along</a>');
 				console.log(err);
 			});;	
 				
@@ -428,7 +436,6 @@ $var title: GraPHOtti.
 		window.onload = function() {
 
 			init_imu();
-			update_history();
 			//init_video();
 
 			//getLocation();
