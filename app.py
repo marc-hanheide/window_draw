@@ -45,7 +45,7 @@ urls = (
     '/log', 'LogServer'
 )
 
-print(os.environ)
+#print(os.environ)
 
 renderer = web.template.render('templates', base="base", globals=globals())
 
@@ -66,7 +66,7 @@ class Geofence():
 
     def valid_position(self, location):
         d = self.distance(location)
-        print "distance: %f" % d
+        #print "distance: %f" % d
         return d < self.max_distance
 
 
@@ -92,7 +92,7 @@ class Acc():
         current_gravity_angle = float(loads(i['gravity_angle']))
         # gravity_angle = gravity_angle * .5 + current_gravity_angle * .5
         current_energy = current_energy + self.up_rate * acc
-        print "last energy: %f, acc_time: %f, current_gravity_angle: %f" % (acc, acc_time, current_gravity_angle)
+        #print "last energy: %f, acc_time: %f, current_gravity_angle: %f" % (acc, acc_time, current_gravity_angle)
 
         new_acc_cond.acquire()
         gravities.append(current_gravity_angle)
@@ -123,7 +123,7 @@ class Acc():
                     'energy': current_energy / 4.0,
                     'gravity_angle': gravity_angle
                 })
-                print e
+                #print e
             finally:
                 new_acc_cond.release()
             block = True
@@ -155,7 +155,7 @@ class PhotoServer():
         i = web.input()
         b64str = i['img']
         from_hist = (i['from_hist'] == "true")
-        print('photopost ' + str(from_hist))
+        #print('photopost ' + str(from_hist))
         new_photo_cond.acquire()
         last_photo_base64 = b64str
         if not from_hist:
@@ -260,9 +260,9 @@ class Tweeter():
             image_io.seek(0)
 
             try:
-                print type(blob)
+                #print type(blob)
                 response = self._twitter.upload_media(media=image_io)
-                print response
+                #print response
                 response = self._twitter.update_status(
                     status=text,
                     media_ids=[response['media_id']])
@@ -407,7 +407,7 @@ class tweet:
                 "This doodle has been shared by @graph0tti for @WestEndLights", last_snapshot['blob']
             )
             # tweeter.tweet('test')
-        print i
+        #print i
         return web.ok()
 
 
