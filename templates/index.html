@@ -159,6 +159,7 @@ $var title: GraPHOtti.
 		function progress(value, text) {
 			$$('#progress').css("width", value.toString()+"%");
 			$$('#progress').html(text);
+			console.log('> progress: ', value, ' ', text);
       	};
 
 		function new_shot() {
@@ -334,7 +335,7 @@ $var title: GraPHOtti.
 				let ratio = track_settings.aspectRatio;
 				video.height=height;
 				$$('.only_with_video').show();
-				progress(60, "show video");
+				progress(60, "show video canvas");
 
 				//Create image capture object and get camera capabilities
 				try {
