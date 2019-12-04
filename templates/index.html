@@ -209,7 +209,7 @@ $var title: GraPHOtti.
 				let hist = json['files'];
 				for(f in hist) {
 					let url = clean_url(hist[f]);
-					console.log(url);
+					//console.log(url);
 					$$('#hist_'+f.toString()).attr("src", url);
 				}
 			});
@@ -223,11 +223,11 @@ $var title: GraPHOtti.
 			//console.log(base64Str);
 			let video = document.getElementById('video');
 			video.pause();
-			console.log(img);
+			//console.log(img);
 			let base_image = new Image();
 			base_image.src = img.src;
   			base_image.onload = function() {
-				console.log('draw ' + base_image.width);
+				//console.log('draw ' + base_image.width);
     			context.drawImage(base_image, 0, 0, base_image.width, base_image.height);
 				snap_photo(true);
   			}
@@ -257,7 +257,7 @@ $var title: GraPHOtti.
 						if (Date.now() > last_ts+500) {
 							acc_abs = acc_abs / count;
 							//if (acc_abs > 1.0) {
-								console.log(acc_abs + ' m/s2 ');
+								//console.log(acc_abs + ' m/s2 ');
 								send_acc(acc_abs, acc_time, gravity_angle);
 							//}
 							acc_abs = 0.0;
@@ -270,17 +270,6 @@ $var title: GraPHOtti.
 					}
 				} 
 			}
-		}
-
-		function clean_url(suffix) {
-			let pathname = location.pathname;
-			let r = '';
-			if (pathname.endsWith("/")) {
-				r = pathname+suffix;
-			} else {
-				r = pathname+'/'+suffix;
-			}
-			return r;
 		}
 
 		function snap_photo(from_hist) {
@@ -335,14 +324,18 @@ $var title: GraPHOtti.
 					audio: false
 			}).then(function(stream) {
 				//info("Good news, your camera should be possible to use. initialising...");
-				progress(50, "Video stream ready");
+				progress(50, "video stream ready");
 				const track = stream.getVideoTracks()[0];
+				progress(55, "got track");
 				let track_settings = track.getSettings();
 				let width = track_settings.width;
 				video.width=width;
 				let height = track_settings.height;
 				let ratio = track_settings.aspectRatio;
 				video.height=height;
+				$$('.only_with_video').show();
+				progress(60, "show video");
+
 				//Create image capture object and get camera capabilities
 				try {
 					const imageCapture = new ImageCapture(track);
@@ -355,15 +348,17 @@ $var title: GraPHOtti.
 								advanced: [{torch: btn.checked}]
 							});
 						});
+						progress(62, "enabled torch");
 					});
 				}
-				catch (e) {
-					console.log(e);
+				catch (error) {
+					console.warn( 
+					"setting torch impossible: ", error.message );
+					console.warn( error.stack );
+				throw(error);
 				}
 				video.srcObject = stream;
-				
-				// start the video
-				video.play();
+				progress(65, "set stream for video");
 
 				video.onplaying = function () {
 					//info("... getting a video stream, not long now...");
@@ -391,43 +386,53 @@ $var title: GraPHOtti.
 					console.log(mat_ratio_height, mat_width, ratio);
 					const FPS = 5;
 					function processVideo() {
+						try {
+							let begin = Date.now();
+							if (!video.paused) {
+								if (first_run) progress(90, "... got video to process, hang tight...");
+								let dst = new cv.Mat(mat_height, mat_width, cv.CV_8UC1);
+								let src = new cv.Mat(mat_height, mat_width, cv.CV_8UC4);
+								context.drawImage(video, 0, 0, mat_width, mat_ratio_height);
+								src.data.set(context.getImageData(
+									0, 0, 
+									mat_width, mat_height).data);
+								//cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+								cv.Canny(src, dst, 40, 120, 3, false);
+								//console.log(dst);
+								//cv.bitwise_or(src, src, dst2, dst);
+								src.delete();
+								//dst.delete();
+								if (first_run) {
+									$$('#canvasOutput_placeholder').hide(); 
+									first_run = false;
+									document.getElementById('canny_anchor').scrollIntoView();
+								}
 
-						let begin = Date.now();
-						if (!video.paused) {
-							if (first_run) progress(90, "... got video to process, hang tight...");
-							let dst = new cv.Mat(mat_height, mat_width, cv.CV_8UC1);
-							let src = new cv.Mat(mat_height, mat_width, cv.CV_8UC4);
-							context.drawImage(video, 0, 0, mat_width, mat_ratio_height);
-							src.data.set(context.getImageData(
-								0, 0, 
-								mat_width, mat_height).data);
-							//cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
-							cv.Canny(src, dst, 40, 120, 3, false);
-							//console.log(dst);
-							//cv.bitwise_or(src, src, dst2, dst);
-							src.delete();
-							//dst.delete();
-							if (first_run) {
-								$$('.only_with_video').show();
-								$$('#canvasOutput_placeholder').hide(); 
-								first_run = false;
-								document.getElementById('canny_anchor').scrollIntoView();
+								//cv.bitwise_not(dst, dst);
+								cv.imshow("canvasOutput", dst); // canvasOutput is the id of another <canvas>;
+								dst.delete();
+								let delay = 1000/FPS - (Date.now() - begin);
+								setTimeout(processVideo, delay);
 							}
-
-							//cv.bitwise_not(dst, dst);
-							cv.imshow("canvasOutput", dst); // canvasOutput is the id of another <canvas>;
-							dst.delete();
-							let delay = 1000/FPS - (Date.now() - begin);
-							setTimeout(processVideo, delay);
 						} 
+						catch(error) {
+							console.error( 
+								"Error caught in process_video():", error.message );
+							console.error( error.stack );
+							throw(error);
+						}
 					}
 					// schedule first one.
 					setTimeout(processVideo, 0);
 				};
+				video.play();
 
-			}).catch(function(err) {
+			}).catch(function(error) {
 				info('Sorry, your phone\'s camera doesn\'t work for this. Maybe you didn\'t allow this website to access your camera or your phone/browser doesn\'t support camera access? You can still choose a <a href="#history">previous snap</a> or just <a href="#draw">doodle along</a>');
-				console.log(err);
+				console.error( 
+					"Error caught in init_video():", error.message );
+				console.error( error.stack );
+
 			});;	
 				
 
@@ -439,7 +444,7 @@ $var title: GraPHOtti.
 			//init_video();
 
 			//getLocation();
-			// rewireLoggingToElement(
+			rewireLoggingToServer();
 			// 	() => document.getElementById("log"),
 			// 	() => document.getElementById("log-container"), true);
 
@@ -538,7 +543,7 @@ $var title: GraPHOtti.
 			    }
 				maximise(view, "myCanvas");		
 
-			console.log(location);
+			//console.log(location);
 			var photo_source = new EventSource(clean_url("photo"));
 			photo_source.onmessage = function(event) {
 				var d = JSON.parse(event.data);

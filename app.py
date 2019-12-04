@@ -41,7 +41,8 @@ urls = (
     '/view', 'view',
     '/acc', 'Acc',
     '/about', 'about',
-    '/photo', 'PhotoServer'
+    '/photo', 'PhotoServer',
+    '/log', 'LogServer'
 )
 
 print(os.environ)
@@ -129,6 +130,20 @@ class Acc():
             if e is not None:
                 r = self.response(str(e))
                 yield r
+
+class LogServer():
+    def POST(self):
+        d = web.input()
+        ctx = web.ctx
+        env = ctx['environ']
+        print "*** LOG: %s\n      [%s: %s]\n      %s" % (
+            d['logger'],
+            ctx['ip'],
+            env['HTTP_USER_AGENT'],
+            d['msg']
+        )
+        return web.ok()
+
 
 class PhotoServer():
     def response(self, data):

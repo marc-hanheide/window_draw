@@ -44,44 +44,85 @@ $def with (page, vars=None)
 			longitude = 0.0;
 			var URL_PATH = location.pathname;
 
+			function clean_url(suffix) {
+				let pathname = location.pathname;
+				let r = '';
+				if (pathname.endsWith("/")) {
+					r = pathname+suffix;
+				} else {
+					r = pathname+'/'+suffix;
+				}
+				return r;
+			}
 
-		function rewireLoggingToElement(eleLocator, eleOverflowLocator, autoScroll) {
-			fixLoggingFunc('log');
-			fixLoggingFunc('debug');
-			fixLoggingFunc('warn');
-			fixLoggingFunc('error');
-			fixLoggingFunc('info');
+			function rewireLoggingToElement(eleLocator, eleOverflowLocator, autoScroll) {
+				fixLoggingFunc('log');
+				fixLoggingFunc('debug');
+				fixLoggingFunc('warn');
+				fixLoggingFunc('error');
+				fixLoggingFunc('info');
 
-			function fixLoggingFunc(name) {
-				console['old' + name] = console[name];
-				console[name] = function(...arguments) {
-					const output = produceOutput(name, arguments);
-					const eleLog = eleLocator();
+				function fixLoggingFunc(name) {
+					console['old' + name] = console[name];
+					console[name] = function(...arguments) {
+						const output = produceOutput(name, arguments);
+						const eleLog = eleLocator();
 
-					if (autoScroll) {
-						const eleContainerLog = eleOverflowLocator();
-						const isScrolledToBottom = eleContainerLog.scrollHeight - eleContainerLog.clientHeight <= eleContainerLog.scrollTop + 1;
-						eleLog.innerHTML += output + "<br>";
-						if (isScrolledToBottom) {
-							eleContainerLog.scrollTop = eleContainerLog.scrollHeight - eleContainerLog.clientHeight;
+						if (autoScroll) {
+							const eleContainerLog = eleOverflowLocator();
+							const isScrolledToBottom = eleContainerLog.scrollHeight - eleContainerLog.clientHeight <= eleContainerLog.scrollTop + 1;
+							eleLog.innerHTML += output + "<br>";
+							if (isScrolledToBottom) {
+								eleContainerLog.scrollTop = eleContainerLog.scrollHeight - eleContainerLog.clientHeight;
+							}
+						} else {
+							eleLog.innerHTML += output + "<br>";
 						}
-					} else {
-						eleLog.innerHTML += output + "<br>";
-					}
 
-					console['old' + name].apply(undefined, arguments);
-				};
+						console['old' + name].apply(undefined, arguments);
+					};
+				}
+
+				function produceOutput(name, args) {
+					return args.reduce((output, arg) => {
+						return output +
+							"<span class=\"log-" + (typeof arg) + " log-" + name + "\">" +
+								(typeof arg === "object" && (JSON || {}).stringify ? JSON.stringify(arg) : arg) +
+							"</span>&nbsp;";
+					}, '');
+				}
 			}
 
-			function produceOutput(name, args) {
-				return args.reduce((output, arg) => {
-					return output +
-						"<span class=\"log-" + (typeof arg) + " log-" + name + "\">" +
+			function rewireLoggingToServer() {
+				fixLoggingFunc('log');
+				fixLoggingFunc('debug');
+				fixLoggingFunc('warn');
+				fixLoggingFunc('error');
+				fixLoggingFunc('info');
+
+				function fixLoggingFunc(name) {
+					console['old' + name] = console[name];
+					console[name] = function(...arguments) {
+						try {
+							const output = produceOutput(name, arguments);
+							$$.post(clean_url('log'), {
+								'msg': output,
+								'logger': name
+							});
+						} 
+						catch(e) {}
+ 						console['old' + name].apply(undefined, arguments);
+					};
+				}
+
+				function produceOutput(name, args) {
+					return args.reduce((output, arg) => {
+						return output +
 							(typeof arg === "object" && (JSON || {}).stringify ? JSON.stringify(arg) : arg) +
-						"</span>&nbsp;";
-				}, '');
+							' ';
+					}, '');
+				}
 			}
-		}
 
 
 			function showPosition(mapholder_div, latitude, longitude) {
