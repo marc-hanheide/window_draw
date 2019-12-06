@@ -20,17 +20,11 @@ canvas[resize] {
             <strong>This is the master view, authenticated by key. Only one of these should be open at a time</strong>
       </div>
       <div id="canvascontainer" style="text-align:center">
-        $if master:
-            <div  class="panel-body text-center" style="margin:0 auto; background: black; max-width: 100vmin; max-height: 100vmin">
-              <canvas class="text-center" id="myCanvas" keepalive="true" resize="true" width="2600" height="2600" style="border:0px solid #333333;background: black;">
-              </canvas>
-              <img id="canvasOutput"> </img>
-            </div>
-        $else:
-            <div  class="panel-body text-center" style="margin:0 auto; max-width: 70vmin; max-height: 70vmin">
-              <canvas class="text-center" id="myCanvas" keepalive="true" resize="true" width="2600" height="2600" style="border:0px solid #333333;background: black;">
-              </canvas>
-            </div>
+        <div  class="panel-body text-center" style="margin:0 auto; background: black; max-width: 100vmin; max-height: 100vmin">
+          <canvas class="text-center" id="myCanvas" keepalive="true" resize="true" width="2600" height="2600" style="border:0px solid #333333;background: black;">
+          </canvas>
+          <img id="canvasOutput"> </img>
+        </div>
       </div>
     </div>
 
@@ -390,13 +384,11 @@ canvas[resize] {
 
           //stars();
       };
-
+      var background = new paper.Layer();
+      var secondLayer = new paper.Layer();
+      secondLayer.activate();
 
       $if master:
-
-          var background = new paper.Layer();
-          var secondLayer = new paper.Layer();
-          secondLayer.activate();
           snow_init();
 
           var acc_source = new EventSource("acc");
@@ -406,12 +398,12 @@ canvas[resize] {
             gravity = d['gravity_angle'];
           }
 
-          var photo_source = new EventSource("photo");
-          photo_source.onmessage = function(event) {
-            var d = JSON.parse(event.data);
-            console.log('photo received ' + event.data);
-            view.new_photo = d['img'];
-          }
+      var photo_source = new EventSource("photo");
+      photo_source.onmessage = function(event) {
+        var d = JSON.parse(event.data);
+        //console.log('photo received ' + event.data);
+        view.new_photo = d['img'];
+      }
 
 
       var source = new EventSource("sse");
@@ -458,22 +450,25 @@ canvas[resize] {
         //stars();
         $if master:
             snow();
-            if (view.new_photo) {
-              if (view.photo) 
-                view.photo.remove();
-              background.activate();
-              view.photo = new Raster(view.new_photo);
-              console.log(view.photo);
-              view.new_photo = null;
-              view.photo.position = view.center;
-              //view.photo.scale(zoom);
+        if (view.new_photo) {
+          if (view.photo) 
+            view.photo.remove();
+          background.activate();
+          view.photo = new Raster(view.new_photo);
+          console.log(view.photo);
+          view.new_photo = null;
+          view.photo.position = view.center;
+          //view.photo.scale(zoom);
+          $if master and data['mirror']:
               view.photo.scale(-zoom, zoom);
-              secondLayer.activate();
-              for (var p in paths) {
-                paths[p].remove();
-              }
-              paths.length = 0;
-            }
+          $else:
+              view.photo.scale(zoom, zoom);
+          secondLayer.activate();
+          for (var p in paths) {
+            paths[p].remove();
+          }
+          paths.length = 0;
+        }
 
         var max_t = 0;
         for (var p in paths) {
