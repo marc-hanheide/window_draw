@@ -380,7 +380,17 @@ class index(DrawPage):
         # for (k, v) in web.ctx.env.items():
         #     if type(v) is str:
         #         session.env[k] = v
-        return renderer.index(config.config)
+        ctx = web.ctx
+        env = ctx['environ']
+        user_agent = env['HTTP_USER_AGENT']
+        phone_type = 'unknown'
+        if 'iphone' in user_agent.lower():
+            phone_type = 'iphone'
+        elif 'android' in user_agent.lower():
+            phone_type = 'android'
+        else:
+            phone_type = 'unknown'
+        return renderer.index(config.config, phone_type)
 
 
 
