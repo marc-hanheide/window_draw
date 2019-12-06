@@ -109,7 +109,16 @@ $var title: GraPHOtti.
 												>
 										</td>
 								</tr>
-							</table>
+								<tr>
+										$for h in range(4,8):
+											<td>
+												<img 
+													class="img-responsive" id="hist_$h" src=""
+													onclick="click_history(this);"
+													>
+											</td>
+									</tr>
+								</table>
 						</div>
 					</div>				
 				</div>
@@ -215,7 +224,7 @@ $var title: GraPHOtti.
 
 
 		function update_history() {
-			$$.get(clean_url('history?len=4'), function (json) {
+			$$.get(clean_url('history?len=8'), function (json) {
 				let hist = json['files'];
 				for(f in hist) {
 					let url = clean_url(hist[f]);

@@ -492,6 +492,21 @@ class history:
             img.save(image_out, 'png')
             web.header('Content-Type', 'image/png')  # file type
             return image_out.getvalue()
+        else:
+            glob_pat = abspath + '/images/history_*.png'
+            hist_files = glob(glob_pat)
+            sorted_files = sorted(hist_files, key=os.path.getctime, reverse=True)
+            snaps = {
+                'files': [('history/' + os.path.basename(f)) for f in sorted_files[:16]]
+            }
+            glob_pat = abspath + '/images/graphotti_*.jpg'
+            hist_files = glob(glob_pat)
+            sorted_files = sorted(hist_files, key=os.path.getctime, reverse=True)
+            drawings = {
+                'files': [('history/' + os.path.basename(f)) for f in sorted_files[:16]]
+            }
+            return renderer.history(snaps, drawings)
+            
 
     def POST(self):
         global last_snapshot
