@@ -489,8 +489,8 @@ class history:
             p = '%s/images/%s' % (abspath, str(fname))
             img = Image.open(p)
             image_out = StringIO()
-            img.save(image_out, 'png')
             img.thumbnail((600,600), Image.ANTIALIAS)
+            img.save(image_out, 'png')
             web.header('Content-Type', 'image/png')  # file type
             return image_out.getvalue()
         else:
