@@ -490,6 +490,7 @@ class history:
             img = Image.open(p)
             image_out = StringIO()
             img.save(image_out, 'png')
+            img.thumbnail((600,600), Image.ANTIALIAS)
             web.header('Content-Type', 'image/png')  # file type
             return image_out.getvalue()
         else:
