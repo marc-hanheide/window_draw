@@ -1,4 +1,4 @@
-$def with (data)
+$def with (data, phone_type)
 
 $var title: GraPHOtti.
 
@@ -15,18 +15,17 @@ $var title: GraPHOtti.
 		</nav>
  -->	
 		<ul class="nav nav-tabs">
-		  <li role="presentation" class="active"><a href="#draw">Doodle</a></li>
-		  <li role="presentation"><a href="/graphotti/about">About</a></li>
-		  <li role="presentation"><a href="#share">Share</a></li>
+			<li role="presentation" class="active"><a href="#canny">Snap</a></li>
+			<li role="presentation" class="active"><a href="#draw">Doodle</a></li>
+			<li role="presentation"><a href="/graphotti/about">About</a></li>
+			<li role="presentation" class="active"><a href="#share">Share</a></li>
 		</ul>
 
-		<div class="jumbotron jumbotron-fluid">
+		<div class="container">
 		  	<h1><small>Graffiti on your phone</small></h1>
-
-		  	<p><small>
-		  		A collaborative, creative "graffiti snow globe".
-		    	<b>Draw</b> on our window! <b>Turn</b> and <b>shake</b> your phone for a wintery snow storm.
-		    </small>
+		  	<p>
+		  		A collaborative, creative "graPhotty experience".
+		    	Take an artistic sketchy <b>snap</b>; <b>draw</b> on our window; <b>turn</b> and <b>shake</b> your phone for a wintery snow storm.
 		    </p>
 		</div>
 
@@ -38,14 +37,100 @@ $var title: GraPHOtti.
 		</style>
  		<div class="container">
 			<div class="row">
-				<div class="panel panel-default">
-				  	<div class="panel-heading">
-						<a name="draw" ></a>
-				    	<h3 class="panel-title">Draw here <small>(don't forget to turn and shack your phone, too!)</small></h3>
+				<div class="panel panel-info">
+					<a id="canny_anchor" name="canny"></a>
+					<div class="panel-heading">
+						<a href="#canny"><h3 class="panel-title"><span class="glyphicon glyphicon-camera"></span>&nbsp;Camera <small>if your phone supports it, you can post an artisitic photo on the window.</small></h3></a>
+					</div>
+					<div class="panel-body">
+						<video hidden id="video" width="600" height="600"></video>
+						<canvas hidden id="canvas" width="600" height="600"></canvas>
+						<div id="canvasOutput_placeholder">
+							<h3>Trying to access your camera.</h3>
+							
+							<p>
+								If your $phone_type device and browser are compatible with this software, a "sketchy" video will soon be shown here.
+								If you are ask to give this website permission to access your camera, please do so for full experience.							
+								<br/>
+								It can be a few more seconds...
+								If you don't see a video here soon, don't worry, you can still <a href="#history">pick a previous shot</a> or simply <a href="#draw">doodle</a> along on other people's shots.
+							</p>
+							<div class="progress">
+								<div id="progress" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 20%;">
+									Initialising...
+								</div>
+							</div>
+						</div>
+						<div hidden="true" class="only_with_video" id="canvascontainer_video" style2="text-align:center">
+							$if phone_type == 'iphone':
+								<p class="lead">
+									On your iPhone, it can be a bit more complicated (greetings to Apple) to make it all work.
+									Try clicking on the canvas below, which should open your camera. 
+									Spot a nice motive and close the video view again to return here.
+									Then click the "<span class="glyphicon glyphicon-camera"></span> Snap Photo" button.
+									Or just <a href="#history">pick a previous shot</a> or simply <a href="#draw">doodle</a> along on other people's shots.
+								</p>
+							$else:
+								<p class="lead">Take a nice shot! <span hidden class="only-with-torch">Use the torch button (<span class="glyphicon glyphicon-phone"></span>) to turn on the light of your phone (if supported). </span>
+									Once you snapped your photo, <a href="#draw">doodle</a> on it below. 
+									If the video is stopped after a snap, simply touch it to go back to live view.
+								</p>
+							<div style="max-width: 100vmin; max-height: 100vmin">
+								<canvas id="canvasOutput" keepalive="true" 
+									width="600" height="600" resize="true" 
+									style="border:2px solid #555555;background: black;">
+								</canvas>
+							</div>
+						
+							<div class="btn-toolbar" role="toolbar">
+								<div class="btn-group">
+									<!-- <button type="button" class="btn btn-default" id="change_cam">
+										<span class="glyphicon glyphicon-refresh"></span>
+										Flip Camera</button> -->
+									<button type="button" id="snap"  class="btn btn-primary" onclick="snap_photo(false);">
+										<span class="glyphicon glyphicon-camera"></span>
+										Snap Photo</button>
+								</div>&nbsp;
+								<div class="btn-group"><div class="only-with-torch" hidden  ></span><input id="torch" type="checkbox" >
+									<span class="glyphicon glyphicon-phone"></span>
+								Use Torch </input></div></div>
+							</div>
+						</div>
+						<div>
+							<a id="history" name="history"></a>
+							<h3>Recent snaps <small>(click to reuse)</small></h3>
+							<table class="table">
+								<tr>
+									$for h in range(0,4):
+										<td>
+											<img 
+												class="img-responsive" id="hist_$h" src=""
+												onclick="click_history(this);"
+												>
+										</td>
+								</tr>
+								<tr>
+										$for h in range(4,8):
+											<td>
+												<img 
+													class="img-responsive" id="hist_$h" src=""
+													onclick="click_history(this);"
+													>
+											</td>
+									</tr>
+								</table>
+						</div>
+					</div>				
+				</div>
+			</div>
+			<div class="row">
+				<div class="panel panel-success">
+					<a id="draw_anchor" name="draw"></a>
+					<div class="panel-heading">
+						<a href="#draw"><h3 class="panel-title"><span class="glyphicon glyphicon-pencil"></span>&nbsp;Draw here <small>(don't forget to turn and shack your phone, too!)</small></h3></a>
 				  	</div>
 				  	<div class="panel-body text-center">
-						<a name="draw"></a>
-						<button type="button" class="btn btn-success btn-block" onclick="fullscreen_canvas();">Go fullscreen!</button>
+						<!-- <button type="button" class="btn btn-success btn-block" onclick="fullscreen_canvas();">Go fullscreen!</button> -->
 
 					    <div id="canvascontainer" style="text-align:center">
 					    	<div style="max-width: 100vmin; max-height: 100vmin">
@@ -53,8 +138,7 @@ $var title: GraPHOtti.
 								</canvas>
 							</div>
 						</div>
-						<a type="button" class="btn btn-warning btn-block" href="/graphotti/image_store"><h3>View current window</h3> <img src="/graphotti/image_store" width="50px" /></a>
-
+						<p>Go back to <b><a onclick="new_shot();">take another snap</a></b> or <b><a onclick="new_from_history();">choose from previous ones</a></b>.</p>
 					</div>				
 				</div>
 			</div>
@@ -66,50 +150,47 @@ $var title: GraPHOtti.
 				  	</div>
 				  	<div class="panel-body">
 						<a name="share"></a>
-						<button type="button" class="btn btn-primary btn-block" onclick="tweet();">Tweet current doodle on @graPH0tti</button>
+						<a target="_blank" type="button" class="btn btn-warning btn-block" href="/graphotti/image_store">
+							<span class="glyphicon glyphicon-eye-open"></span>&nbsp; View current window</a>
+						<button type="button" class="btn btn-primary btn-block" onclick="tweet();">
+							<span class="glyphicon glyphicon-share"></span>&nbsp; Tweet current window directly on @graPH0tti</button>
 					</div>
-<!-- 				  	<div class="panel-body">
-
-
-						<div class="fb-like" data-href="https://lcas.lincoln.ac.uk/graphotti/about" data-layout="standard" data-action="like" data-show-faces="false" data-share="true"></div>
-
-				  		<a href="https://twitter.com/graPH0tti" class="twitter-follow-button" data-show-count="false" data-size="large" data-dnt="true">Follow @graPH0tti</a>
-						<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-
-						<a href="https://twitter.com/intent/tweet?screen_name=graPH0tti&text=%23westendlights" class="twitter-mention-button" data-size="large" data-related="graPH0tti,WestEndLights" data-dnt="true">Tweet to @graPH0tti</a>
-						<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-
-					</div>
-					<div class="panel-body">
-						<a class="twitter-timeline" data-dnt="true" href="https://twitter.com/graPH0tti" data-widget-id="664420268740354048">Tweets by @graPH0tti</a>
-						<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>				
-
-					</div>
--->
 				</div>
  
 
 			</div>
-<!-- 
-			<div class="row">
-				<div class="panel panel-default">
-					<div class="panel-heading">
-						<h3 class="panel-title">Where you are</h3>
-					</div>
-					<div class="panel-body">
-						<div id="mapholder"><H3>GraPHOtti needs to know your location to make sure you are close to our Window before you are allowed to draw.</H3></div>
-					</div>
+			<!-- <div class="row">
+
+				<div id="log-container">
+					<pre id="log"></pre>
 				</div>
-			</div>
- -->
+	
+			</div>  -->
 		</div>
 
 
+	<script async type="text/javascript"  src="/static/js/opencv.js" onload="register_cv();"></script>
 
 
 	<script type="text/javascript">
 
+		function progress(value, text) {
+			$$('#progress').css("width", value.toString()+"%");
+			$$('#progress').html(text);
+			console.log('> progress: ', value, ' ', text);
+      	};
 
+		function new_shot() {
+			var video = document.getElementById('video');
+			video.play();
+			document.getElementById('canny_anchor').scrollIntoView();
+		}
+
+		function new_from_history() {
+			var video = document.getElementById('video');
+			video.pause();
+			document.getElementById('history').scrollIntoView();
+		}
 
 		function fullscreen_canvas() {
             var el = document.getElementById('canvascontainer');
@@ -130,16 +211,48 @@ $var title: GraPHOtti.
 		}
 
 		function tweet() {
-			$$.post('tweet', {});
+			$$.post(clean_url('tweet'), {});
 		}
 
 		function send_acc(a, t, gravity_angle) {
-			$$.post(location.pathname + '/acc', {
+			$$.post(clean_url('acc'), {
 				'acc_abs': a,
 				'acc_time': t,
 				'gravity_angle': gravity_angle
 			});
 		}
+
+
+		function update_history() {
+			$$.get(clean_url('history?len=8'), function (json) {
+				let hist = json['files'];
+				for(f in hist) {
+					let url = clean_url(hist[f]);
+					//console.log(url);
+					$$('#hist_'+f.toString()).attr("src", url);
+				}
+			});
+		}
+
+		function click_history(img) {
+			let canvasOutput = document.getElementById("canvasOutput"); 
+			let context = canvasOutput.getContext('2d');
+			let base64Str = canvasOutput.toDataURL("image/png");
+			//base64Str = base64Str.replace('data:image/jpg;base64,','');
+			//console.log(base64Str);
+			let video = document.getElementById('video');
+			video.pause();
+			//console.log(img);
+			let base_image = new Image();
+			base_image.src = img.src;
+  			base_image.onload = function() {
+				//console.log('draw ' + base_image.width);
+    			context.drawImage(base_image, 0, 0, base_image.width, base_image.height);
+				snap_photo(true);
+  			}
+			//document.getElementById('draw_anchor').scrollIntoView();
+		}
+
 
 
 		function init_imu() {
@@ -163,7 +276,7 @@ $var title: GraPHOtti.
 						if (Date.now() > last_ts+500) {
 							acc_abs = acc_abs / count;
 							//if (acc_abs > 1.0) {
-								console.log(acc_abs + ' m/s2 ');
+								//console.log(acc_abs + ' m/s2 ');
 								send_acc(acc_abs, acc_time, gravity_angle);
 							//}
 							acc_abs = 0.0;
@@ -178,11 +291,182 @@ $var title: GraPHOtti.
 			}
 		}
 
+		function snap_photo(from_hist) {
+			let canvasOutput = document.getElementById("canvasOutput"); 
+			let base64Str = canvasOutput.toDataURL("image/png");
+			//base64Str = base64Str.replace('data:image/jpg;base64,','');
+			//console.log(base64Str);
+			$$.post(clean_url('photo'), {
+				img: base64Str,
+				from_hist: from_hist
+			});
+			var video = document.getElementById('video');
+			video.pause();
+			for (p in paths) {
+				paths[p].remove();
+			}
+			paths.length = 0;
+			document.getElementById('draw_anchor').scrollIntoView();
+		}
+
+		function register_cv() {
+			update_history();
+			cv['onRuntimeInitialized']=()=>{
+				console.log('opencv ready');
+				progress(30, "CV ready");
+				if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+					console.log('initialise video capture');
+					init_video();
+				} else {
+					console.log('no media device API available');
+				}
+			}
+		}
+
+		function info(info) {
+			document.getElementById("canvasOutput_placeholder").innerHTML=info;
+		}
+
+		function init_video() {
+			var video = document.getElementById('video');
+			//console.log(navigator.mediaDevices.getSupportedConstraints());
+			// Not adding `{ audio: true }` since we only want video now
+			progress(40, "Check Permission");
+			navigator.mediaDevices.getUserMedia({
+					video: {
+						facingMode: { ideal: 'environment'},
+						frameRate: { ideal: 5},
+						aspectRatio: { ideal: 1},
+						width: {max: 900},
+						height: {ideal: 600, max: 600}
+					},
+					audio: false
+			}).then(function(stream) {
+				//info("Good news, your camera should be possible to use. initialising...");
+				progress(50, "video stream ready");
+				const track = stream.getVideoTracks()[0];
+				progress(55, "got track");
+				let track_settings = track.getSettings();
+				let width = track_settings.width;
+				video.width=width;
+				let height = track_settings.height;
+				let ratio = track_settings.aspectRatio;
+				video.height=height;
+				$$('.only_with_video').show();
+				progress(60, "show video canvas");
+
+				//Create image capture object and get camera capabilities
+				try {
+					const imageCapture = new ImageCapture(track);
+					const photoCapabilities = imageCapture.getPhotoCapabilities().then(photoCapabilities => {
+						//let there be light!
+						const btn = document.querySelector('#torch');
+						$$('.only-with-torch').show();
+						btn.addEventListener('click', function(){
+							track.applyConstraints({
+								advanced: [{torch: btn.checked}]
+							});
+						});
+						progress(62, "enabled torch");
+					});
+				}
+				catch (error) {
+					console.warn( 
+					"setting torch impossible: ", error.message );
+					console.warn( error.stack );
+				}
+				video.srcObject = stream;
+				progress(65, "set stream for video, ready to play");
+				document.getElementById('canny_anchor').scrollIntoView();
+
+				video.onplaying = function () {
+					//info("... getting a video stream, not long now...");
+					progress(70, "camera is streaming");
+
+					console.log('playing');
+					let canvasFrame = document.getElementById("canvas"); // canvasFrame is the id of <canvas>
+					let canvasOutput = document.getElementById("canvasOutput"); 
+					canvasOutput.onclick = function () {
+						if (video.paused) {
+							video.play();
+						} else {
+							video.pause();
+						}
+
+					};
+					let context = canvasFrame.getContext("2d");
+
+					let ratio = width / height;
+					let mat_width = canvasOutput.width; //canvasFrame.width;
+					let mat_height = canvasOutput.height; //canvasFrame.width / ratio;
+					let mat_ratio_height = mat_width / ratio;
+					let first_run = true;
+
+					console.log(mat_ratio_height, mat_width, ratio);
+					const FPS = 5;
+					function processVideo() {
+						try {
+							let begin = Date.now();
+							if (!video.paused) {
+								if (first_run) progress(90, "... got video to process, hang tight...");
+								let dst = new cv.Mat(mat_height, mat_width, cv.CV_8UC1);
+								let src = new cv.Mat(mat_height, mat_width, cv.CV_8UC4);
+								context.drawImage(video, 0, 0, mat_width, mat_ratio_height);
+								src.data.set(context.getImageData(
+									0, 0, 
+									mat_width, mat_height).data);
+								//cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+								cv.Canny(src, dst, 40, 120, 3, false);
+								//console.log(dst);
+								//cv.bitwise_or(src, src, dst2, dst);
+								src.delete();
+								//dst.delete();
+								if (first_run) {
+									$$('#canvasOutput_placeholder').hide(); 
+									first_run = false;
+									progress(100, "complete");
+								}
+
+								//cv.bitwise_not(dst, dst);
+								cv.imshow("canvasOutput", dst); // canvasOutput is the id of another <canvas>;
+								dst.delete();
+								let delay = 1000/FPS - (Date.now() - begin);
+								setTimeout(processVideo, delay);
+							}
+						} 
+						catch(error) {
+							console.error( 
+								"Error caught in process_video():", error.message );
+							console.error( error.stack );
+							throw(error);
+						}
+					}
+					// schedule first one.
+					setTimeout(processVideo, 0);
+				};
+				video.play();
+
+			}).catch(function(error) {
+				info('Sorry, your phone\'s camera doesn\'t work for this. Maybe you didn\'t allow this website to access your camera or your phone/browser doesn\'t support camera access? You can still choose a <a href="#history">previous snap</a> or just <a href="#draw">doodle along</a>');
+				console.error( 
+					"Error caught in init_video():", error.message );
+				console.error( error.stack );
+
+			});;	
+				
+
+		}
+
 		window.onload = function() {
 
 			init_imu();
+			//init_video();
 
-			getLocation();
+			//getLocation();
+			rewireLoggingToServer();
+			// 	() => document.getElementById("log"),
+			// 	() => document.getElementById("log-container"), true);
+
 
 
 			// Get a reference to the canvas object
@@ -190,10 +474,13 @@ $var title: GraPHOtti.
 			// Create an empty project and a view for the canvas:
 			paper.setup(canvas);
 
-
+			document.getElementById('canny_anchor').scrollIntoView();
 
 			with (paper) {
     		    maximise(view, "myCanvas");
+				var background = new paper.Layer();
+				var secondLayer = new paper.Layer();
+				secondLayer.activate();
 
 				// Create a simple drawing tool:
 				var tool = new Tool();
@@ -212,8 +499,7 @@ $var title: GraPHOtti.
 
 				// Define a mousedown and mousedrag handler
 				tool.onMouseDown = function(event) {
-					if (latitude == 0.0  && longitude == 0.0)
-						return;
+					secondLayer.activate();
 					path = new Path();
 					color = [	Math.random()*0.5 + 0.5,
 								Math.random()*0.5 + 0.5,
@@ -228,8 +514,7 @@ $var title: GraPHOtti.
 				}
 
 				tool.onMouseDrag = function(event) {
-					if (latitude == 0.0  && longitude == 0.0)
-						return;
+					secondLayer.activate();
 					p = event.point;
 					// p.x /= pixel_ratio;
 					// p.y /= pixel_ratio;
@@ -237,8 +522,7 @@ $var title: GraPHOtti.
 				}
 
 				tool.onMouseUp = function(event) {
-					if (latitude == 0.0  && longitude == 0.0)
-						return;
+					secondLayer.activate();
 					var data = {};
 					data['path'] = path.exportJSON();
 					data['zoom'] = zoom;
@@ -252,10 +536,6 @@ $var title: GraPHOtti.
 
 			    view.onFrame = function(event) {
 					// On each frame, rotate the path by 3 degrees:
-					if (geo_wait_text && latitude != 0.0 && longitude != 0.0) {
-						geo_wait_text.remove();
-						geo_wait_text = null;
-					}
 
 					for (p in paths) {
 						//console.log(paths[p].strokeColor);
@@ -282,6 +562,25 @@ $var title: GraPHOtti.
 			    }
 				maximise(view, "myCanvas");		
 
+			//console.log(location);
+			var photo_source = new EventSource(clean_url("photo"));
+			photo_source.onmessage = function(event) {
+				var d = JSON.parse(event.data);
+				console.log('photo received');
+				//if (view.photo) 
+					//view.photo.remove();
+				background.activate();
+				//let canvasOutput = document.getElementById("canvasOutput"); 
+				//canvasOutput.src = d['img']
+				view.photo = new Raster(d['img']);
+				view.photo.position = view.center;
+				view.photo.scale(zoom);
+				for (p in paths) {
+					paths[p].remove();
+				}
+				paths.length = 0;
+				update_history();
+			}
 
 
 			}

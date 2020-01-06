@@ -1,0 +1,60 @@
+$def with (snaps, drawings)
+
+$var title: GraPHOtti Gallery.
+<ul class="nav nav-tabs">
+        <li role="presentation"><a href="/graphotti/#canny">Snap</a></li>
+        <li role="presentation"><a href="/graphotti/#draw">Draw</a></li>
+        <li role="presentation" class="active"><a href="#about">About</a></li>
+          <li role="presentation"><a href="/graphotti/#share">Share</a></li>
+    </ul>
+    
+
+ 		<div class="container">
+			<div class="row">
+				<div class="panel panel-info">
+					<div class="panel-heading">
+						<h3 class="panel-title">Snaps</h3>
+					</div>
+					<div class="panel-body">
+                        <table class="table">
+                            <tr>
+                                $for h in range(len(snaps['files'])):
+                                    $if (h % 4) == 0:
+                                        </tr><tr>
+                                    <td>
+                                        <a href="$snaps['files'][h]">
+                                            <img 
+                                            class="img-responsive" id="hist_$h" src="$snaps['files'][h]"
+                                            >
+                                        </a>
+                                    </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>				
+            </div>
+			<div class="row">
+				<div class="panel panel-info">
+					<div class="panel-heading">
+						<h3 class="panel-title">Drawings</h3>
+					</div>
+					<div class="panel-body">
+                        <table class="table">
+                            <tr>
+                                $for h in range(len(drawings['files'])):
+                                    $if (h % 4) == 0:
+                                        </tr><tr>
+                                    <td>
+                                        <a href="$drawings['files'][h]">
+                                            <img 
+                                            class="img-responsive" id="drawings_$h" src="$drawings['files'][h]"
+                                            >
+                                        </a>
+                                    </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>				
+            </div>
+
+        </div>

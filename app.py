@@ -1,7 +1,11 @@
 import sys
 import os
+from glob import glob
 abspath = os.path.dirname(__file__)
 print abspath
+import cv2
+import numpy as np
+from base64 import b64decode
 
 if len(abspath) > 0:
     sys.path.append(abspath)
@@ -30,15 +34,18 @@ from geopy.distance import vincenty
 urls = (
     '/', 'index',
     '/simple', 'index_simple',
+    '/history(.*)', 'history',
     '/image_store', 'image_store',
     '/tweet', 'tweet',
     '/sse', 'SSEServer',
     '/view', 'view',
     '/acc', 'Acc',
-    '/about', 'about'
+    '/about', 'about',
+    '/photo', 'PhotoServer',
+    '/log', 'LogServer'
 )
 
-print(os.environ)
+#print(os.environ)
 
 renderer = web.template.render('templates', base="base", globals=globals())
 
@@ -59,12 +66,13 @@ class Geofence():
 
     def valid_position(self, location):
         d = self.distance(location)
-        print "distance: %f" % d
+        #print "distance: %f" % d
         return d < self.max_distance
 
 
 current_energy = 0.0
 gravities = []
+last_photo_base64 = None
 
 class Acc():
 
@@ -84,7 +92,7 @@ class Acc():
         current_gravity_angle = float(loads(i['gravity_angle']))
         # gravity_angle = gravity_angle * .5 + current_gravity_angle * .5
         current_energy = current_energy + self.up_rate * acc
-        print "last energy: %f, acc_time: %f, current_gravity_angle: %f" % (acc, acc_time, current_gravity_angle)
+        #print "last energy: %f, acc_time: %f, current_gravity_angle: %f" % (acc, acc_time, current_gravity_angle)
 
         new_acc_cond.acquire()
         gravities.append(current_gravity_angle)
@@ -115,9 +123,73 @@ class Acc():
                     'energy': current_energy / 4.0,
                     'gravity_angle': gravity_angle
                 })
-                print e
+                #print e
             finally:
                 new_acc_cond.release()
+            block = True
+            if e is not None:
+                r = self.response(str(e))
+                yield r
+
+class LogServer():
+    def POST(self):
+        d = web.input()
+        ctx = web.ctx
+        env = ctx['environ']
+        print "*** LOG: %s\n      [%s: %s]\n      %s" % (
+            d['logger'],
+            ctx['ip'],
+            env['HTTP_USER_AGENT'],
+            d['msg']
+        )
+        return web.ok()
+
+
+class PhotoServer():
+    def response(self, data):
+        response = "data: " + data + "\n\n"
+        return response
+
+    def POST(self):
+        global last_photo_base64
+        i = web.input()
+        b64str = i['img']
+        from_hist = (i['from_hist'] == "true")
+        #print('photopost ' + str(from_hist))
+        new_photo_cond.acquire()
+        last_photo_base64 = b64str
+        if not from_hist:
+            history.store(b64str)
+
+        # image = np.asarray(bytearray(png_data), dtype="uint8")
+        # cv_image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+        # cv2.imwrite('out.png', cv_image)
+        try:
+            new_photo_cond.notifyAll()
+        finally:
+            new_photo_cond.release()
+        return web.ok()
+
+    def GET(self):
+        global last_photo_base64
+        web.header("Content-Type", "text/event-stream")
+        web.header('Cache-Control', 'no-cache')
+        web.header('Content-length:', 0)
+        block = False
+
+        while is_running:
+            try:
+                new_photo_cond.acquire()
+                if block:
+                    new_photo_cond.wait(timeout=sys.maxint)
+                if last_photo_base64:
+                    e = dumps({
+                        'img': last_photo_base64
+                    })
+                else:
+                    e = None
+            finally:
+                new_photo_cond.release()
             block = True
             if e is not None:
                 r = self.response(str(e))
@@ -188,9 +260,9 @@ class Tweeter():
             image_io.seek(0)
 
             try:
-                print type(blob)
+                #print type(blob)
                 response = self._twitter.upload_media(media=image_io)
-                print response
+                #print response
                 response = self._twitter.update_status(
                     status=text,
                     media_ids=[response['media_id']])
@@ -223,6 +295,7 @@ else:
 
 new_path_cond = Condition()
 new_acc_cond = Condition()
+new_photo_cond = Condition()
 current_path = dumps({'path': [],
                      'dummy': range(1, 2048),  # data to stop proxy buffering
                       })
@@ -236,54 +309,57 @@ class DrawPage:
     def POST(self):
         global current_path
         i = web.input()
-        p = loads(i['path'])
-        zoom = float(i['zoom'])
-        if 'latitude' in i:
-            latitude = float(i['latitude'])
-        else:
-            latitude = -1.0
-        if 'longitude' in i:
-            longitude = float(i['longitude'])
-        else:
-            longitude = -1.0
-
-        geo_location = (latitude, longitude)
-
-        #print latitude
-        #if not latitude < 0.0:
-        #    if not geo_fence.valid_position(geo_location):
-        #        return web.notacceptable()
-
-        #pixel_ratio = float(i['pixel_ratio'])
-        for s in p[1]['segments']:
-            s[0] /= (zoom)
-            s[1] /= (zoom)
-        new_path_cond.acquire()
         try:
-            env = {}
-            for (k, v) in web.ctx.env.items():
-                if type(v) is str:
-                    env[k] = v
-            d = {
-                'path': p,
-                'env': env,
-                'dummy': range(1, 2048),  # dummy data to stop proxy buffering
-            }
-            current_path = dumps(d)
-            new_path_cond.notifyAll()
-            # store relevant logs:
-            fname = abspath + '/logs/graphotti_%s.json' % str(datetime.now())
-            with open(fname, 'w') as f:
-                log_data = {
+            p = loads(i['path'])
+            zoom = float(i['zoom'])
+            if 'latitude' in i:
+                latitude = float(i['latitude'])
+            else:
+                latitude = -1.0
+            if 'longitude' in i:
+                longitude = float(i['longitude'])
+            else:
+                longitude = -1.0
+
+            geo_location = (latitude, longitude)
+
+            #print latitude
+            #if not latitude < 0.0:
+            #    if not geo_fence.valid_position(geo_location):
+            #        return web.notacceptable()
+
+            #pixel_ratio = float(i['pixel_ratio'])
+            for s in p[1]['segments']:
+                s[0] /= (zoom)
+                s[1] /= (zoom)
+            new_path_cond.acquire()
+            try:
+                env = {}
+                for (k, v) in web.ctx.env.items():
+                    if type(v) is str:
+                        env[k] = v
+                d = {
                     'path': p,
                     'env': env,
-                    'longitude': longitude,
-                    'latitude': latitude,
-                    'timestamp': str(datetime.now())
+                    'dummy': range(1, 2048),  # dummy data to stop proxy buffering
                 }
-                f.write(dumps(log_data))
-        finally:
-            new_path_cond.release()
+                current_path = dumps(d)
+                new_path_cond.notifyAll()
+                # store relevant logs:
+                fname = abspath + '/logs/graphotti_%s.json' % str(datetime.now())
+                with open(fname, 'w') as f:
+                    log_data = {
+                        'path': p,
+                        'env': env,
+                        'longitude': longitude,
+                        'latitude': latitude,
+                        'timestamp': str(datetime.now())
+                    }
+                    f.write(dumps(log_data))
+            finally:
+                new_path_cond.release()
+        except Exception as e:
+            raise
         return web.ok()
 
 
@@ -304,7 +380,17 @@ class index(DrawPage):
         # for (k, v) in web.ctx.env.items():
         #     if type(v) is str:
         #         session.env[k] = v
-        return renderer.index(config.config)
+        ctx = web.ctx
+        env = ctx['environ']
+        user_agent = env['HTTP_USER_AGENT']
+        phone_type = 'unknown'
+        if 'iphone' in user_agent.lower():
+            phone_type = 'iphone'
+        elif 'android' in user_agent.lower():
+            phone_type = 'android'
+        else:
+            phone_type = 'unknown'
+        return renderer.index(config.config, phone_type)
 
 
 
@@ -331,7 +417,7 @@ class tweet:
                 "This doodle has been shared by @graph0tti for @WestEndLights", last_snapshot['blob']
             )
             # tweeter.tweet('test')
-        print i
+        #print i
         return web.ok()
 
 
@@ -345,6 +431,83 @@ class image_store:
             # web.header('Content-disposition',
             #            'attachment; filename=graphotti.png')
             return last_snapshot['blob']
+
+    def POST(self):
+        global last_snapshot
+        i = web.input()
+        image_in = StringIO()
+        image_in.write(i['data'])
+        image_in.seek(0)
+
+        img = Image.open(image_in)
+        if config.config['mirror']:
+            img_flipped = img.transpose(Image.FLIP_LEFT_RIGHT)
+        else:
+            img_flipped = img
+
+        image_out = StringIO()
+        img_flipped.save(image_out, 'jpeg')
+        i['data'] = image_out.getvalue()
+
+        fname = abspath + '/images/graphotti_%s.jpg' % str(datetime.now())
+        with open(fname, 'w') as f:
+            f.write(i['data'])
+        last_snapshot = {
+            'fname': fname,
+            'blob': i['data']
+        }
+        return web.ok()
+
+class history:
+
+    @staticmethod
+    def store(b64str):
+        clean_b64 = b64str.replace('data:image/png;base64,','')
+        png_data = b64decode(clean_b64)
+        #image_in = StringIO()
+        #image_in.write(png_data)
+        #image_in.seek(0)
+
+        #img = Image.open(image_in)
+        fname = abspath + '/images/history_%s.png' % str(datetime.now())
+        with open(fname, 'w') as f:
+            f.write(png_data)
+
+    def GET(self, fname):
+        i = web.input(len='')
+        if len(i.len) > 0:
+            history_len = int(i.len)
+            glob_pat = abspath + '/images/history_*.png'
+            hist_files = glob(glob_pat)
+            sorted_files = sorted(hist_files, key=os.path.getctime, reverse=True)
+            res = {
+                'files': [('history/' + os.path.basename(f)) for f in sorted_files[:history_len]]
+            }
+            web.header('Content-Type', 'application/json')  # file type
+            return dumps(res)
+        elif fname:
+            p = '%s/images/%s' % (abspath, str(fname))
+            img = Image.open(p)
+            image_out = StringIO()
+            img.thumbnail((600,600), Image.ANTIALIAS)
+            img.save(image_out, 'png')
+            web.header('Content-Type', 'image/png')  # file type
+            return image_out.getvalue()
+        else:
+            glob_pat = abspath + '/images/history_*.png'
+            hist_files = glob(glob_pat)
+            sorted_files = sorted(hist_files, key=os.path.getctime, reverse=True)
+            snaps = {
+                'files': [('history/' + os.path.basename(f)) for f in sorted_files[:16]]
+            }
+            glob_pat = abspath + '/images/graphotti_*.jpg'
+            hist_files = glob(glob_pat)
+            sorted_files = sorted(hist_files, key=os.path.getctime, reverse=True)
+            drawings = {
+                'files': [('history/' + os.path.basename(f)) for f in sorted_files[:16]]
+            }
+            return renderer.history(snaps, drawings)
+            
 
     def POST(self):
         global last_snapshot
