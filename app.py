@@ -474,8 +474,8 @@ class history:
 
         #img = Image.open(image_in)
         fname = abspath + '/images/history_%s.png' % str(datetime.now())
-        with open(fname, 'w') as f:
-            f.write(png_data)
+        with open(fname, 'wb') as f:
+            f.write(str(png_data))
 
     def GET(self, fname):
         i = web.input(len='')
