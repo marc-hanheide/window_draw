@@ -2,8 +2,9 @@ import sys
 import os
 from glob import glob
 abspath = os.path.dirname(__file__)
-print abspath
+print(abspath)
 import cv2
+from math import inf
 import numpy as np
 from base64 import b64decode
 
@@ -20,13 +21,16 @@ from threading import Condition
 from os import _exit, getenv, environ
 from datetime import datetime
 from twython import Twython, TwythonError
-from StringIO import StringIO
+try:
+    from StringIO import StringIO ## for Python 2
+except ImportError:
+    from io import StringIO ## for Python 3
 from PIL import Image
 
 import config
 
 from geopy.geocoders import Nominatim
-from geopy.distance import vincenty
+from geopy.distance import Geodesic
 
 
 
@@ -62,7 +66,7 @@ class Geofence():
         if location is None:
             return float('inf')
         else:
-            return vincenty(self.location, location).km
+            return Geodesic(self.location, location).km
 
     def valid_position(self, location):
         d = self.distance(location)
@@ -136,12 +140,12 @@ class LogServer():
         d = web.input()
         ctx = web.ctx
         env = ctx['environ']
-        print "*** LOG: %s\n      [%s: %s]\n      %s" % (
+        print("*** LOG: %s\n      [%s: %s]\n      %s" % (
             d['logger'],
             ctx['ip'],
             env['HTTP_USER_AGENT'],
             d['msg']
-        )
+        ))
         return web.ok()
 
 
@@ -181,7 +185,7 @@ class PhotoServer():
             try:
                 new_photo_cond.acquire()
                 if block:
-                    new_photo_cond.wait(timeout=sys.maxint)
+                    new_photo_cond.wait()
                 if last_photo_base64:
                     e = dumps({
                         'img': last_photo_base64
@@ -210,10 +214,10 @@ class Tweeter():
                     self._twitter_config['access_token'],
                     self._twitter_config['access_token_secret'])
         except TwythonError as e:
-            print e
+            print (e)
         except Exception as e:
-            print "tweeting disabled as no valid credentials found: %s" \
-                % e.message
+            print ("tweeting disabled as no valid credentials found: %s" \
+                % e)
             self._twitter = None
 
     def tweet(self, text):
@@ -221,14 +225,14 @@ class Tweeter():
             return
 
         nchar = len(text)
-        print "Tweeting %s ... (%d)" % (text, nchar)
+        print("Tweeting %s ... (%d)" % (text, nchar))
         if nchar < 140:
             try:
                 self._twitter.update_status(status=text)
             except TwythonError as e:
-                print e
+                print(e)
         else:
-            print "tweet of more than 140 chars not allowed"
+            print ("tweet of more than 140 chars not allowed")
 
     def tweet_photo_url(self, text, photo_path):
         if self._twitter is None:
@@ -236,16 +240,16 @@ class Tweeter():
 
         nchar = len(text)
 
-        print "Tweeting %s with photo ... (%d)" % (text, nchar)
+        print("Tweeting %s with photo ... (%d)" % (text, nchar))
         if nchar < 140:
             try:
                 photo = open(photo_path, 'rb')
                 self._twitter.update_status_with_media(status=text,
                                                        media=photo)
             except TwythonError as e:
-                print e
+                print(e)
         else:
-            print "tweet of more than 140 chars not allowed"
+            print("tweet of more than 140 chars not allowed")
 
     def tweet_photo(self, text, blob):
         if self._twitter is None:
@@ -253,7 +257,7 @@ class Tweeter():
 
         nchar = len(text)
 
-        print "Tweeting %s with photo ... (%d)" % (text, nchar)
+        print("Tweeting %s with photo ... (%d)" % (text, nchar))
         if nchar < 140:
             image_io = StringIO()
             image_io.write(blob)
@@ -267,9 +271,9 @@ class Tweeter():
                     status=text,
                     media_ids=[response['media_id']])
             except TwythonError as e:
-                print e
+                print(e)
         else:
-            print "tweet of more than 140 chars not allowed"
+            print("tweet of more than 140 chars not allowed")
 
 
 tweeter = Tweeter()
@@ -297,7 +301,7 @@ new_path_cond = Condition()
 new_acc_cond = Condition()
 new_photo_cond = Condition()
 current_path = dumps({'path': [],
-                     'dummy': range(1, 2048),  # data to stop proxy buffering
+                     'dummy': list(range(1, 2048)),  # data to stop proxy buffering
                       })
 
 last_snapshot = None
@@ -341,7 +345,7 @@ class DrawPage:
                 d = {
                     'path': p,
                     'env': env,
-                    'dummy': range(1, 2048),  # dummy data to stop proxy buffering
+                    'dummy': list(range(1, 2048))  # dummy data to stop proxy buffering
                 }
                 current_path = dumps(d)
                 new_path_cond.notifyAll()
@@ -436,7 +440,7 @@ class image_store:
         global last_snapshot
         i = web.input()
         image_in = StringIO()
-        image_in.write(i['data'])
+        image_in.write(str(i['data']))
         image_in.seek(0)
 
         img = Image.open(image_in)
@@ -489,7 +493,7 @@ class history:
             p = '%s/images/%s' % (abspath, str(fname))
             img = Image.open(p)
             image_out = StringIO()
-            img.thumbnail((600,600), Image.ANTIALIAS)
+            img.thumbnail((600,600), Image.LANCZOS)
             img.save(image_out, 'png')
             web.header('Content-Type', 'image/png')  # file type
             return image_out.getvalue()
@@ -551,7 +555,7 @@ class SSEServer:
             new_path_cond.acquire()
             try:
                 if block:
-                    new_path_cond.wait(timeout=sys.maxint)
+                    new_path_cond.wait()
                 e = current_path
             finally:
                 new_path_cond.release()
