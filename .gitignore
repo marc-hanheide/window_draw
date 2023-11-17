@@ -5,3 +5,4 @@
 /images
 /logs
 .vscode/launch.json
+.DS_Store

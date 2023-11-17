@@ -21,10 +21,7 @@ from threading import Condition
 from os import _exit, getenv, environ
 from datetime import datetime
 from twython import Twython, TwythonError
-try:
-    from StringIO import StringIO ## for Python 2
-except ImportError:
-    from io import StringIO ## for Python 3
+from io import BytesIO
 from PIL import Image
 
 import config
@@ -259,7 +256,7 @@ class Tweeter():
 
         print("Tweeting %s with photo ... (%d)" % (text, nchar))
         if nchar < 140:
-            image_io = StringIO()
+            image_io = BytesIO()
             image_io.write(blob)
             image_io.seek(0)
 
@@ -400,7 +397,7 @@ class index(DrawPage):
 
 class view:
     def GET(self):
-        master_key = web.ctx.env.get('GRAPHOTTI_MASTER','')
+        master_key = web.ctx.env.get('GRAPHOTTI_MASTER',getenv('GRAPHOTTI_MASTER', ''))
         i = web.input(key='')
         print('running as master? %s' % (i.key == master_key))
         return renderer.view(config.config, (i.key == master_key))
@@ -439,8 +436,8 @@ class image_store:
     def POST(self):
         global last_snapshot
         i = web.input()
-        image_in = StringIO()
-        image_in.write(str(i['data']))
+        image_in = BytesIO()
+        image_in.write(i['data'])
         image_in.seek(0)
 
         img = Image.open(image_in)
@@ -449,12 +446,12 @@ class image_store:
         else:
             img_flipped = img
 
-        image_out = StringIO()
+        image_out = BytesIO()
         img_flipped.save(image_out, 'jpeg')
         i['data'] = image_out.getvalue()
 
         fname = abspath + '/images/graphotti_%s.jpg' % str(datetime.now())
-        with open(fname, 'w') as f:
+        with open(fname, 'wb') as f:
             f.write(i['data'])
         last_snapshot = {
             'fname': fname,
@@ -468,14 +465,14 @@ class history:
     def store(b64str):
         clean_b64 = b64str.replace('data:image/png;base64,','')
         png_data = b64decode(clean_b64)
-        #image_in = StringIO()
+        #image_in = BytesIO()
         #image_in.write(png_data)
         #image_in.seek(0)
 
         #img = Image.open(image_in)
         fname = abspath + '/images/history_%s.png' % str(datetime.now())
         with open(fname, 'wb') as f:
-            f.write(str(png_data))
+            f.write(png_data)
 
     def GET(self, fname):
         i = web.input(len='')
@@ -492,9 +489,9 @@ class history:
         elif fname:
             p = '%s/images/%s' % (abspath, str(fname))
             img = Image.open(p)
-            image_out = StringIO()
+            image_out = BytesIO()
             img.thumbnail((600,600), Image.LANCZOS)
-            img.save(image_out, 'png')
+            img.save(image_out, format='png')
             web.header('Content-Type', 'image/png')  # file type
             return image_out.getvalue()
         else:
@@ -516,7 +513,7 @@ class history:
     def POST(self):
         global last_snapshot
         i = web.input()
-        image_in = StringIO()
+        image_in = BytesIO()
         image_in.write(i['data'])
         image_in.seek(0)
 
@@ -526,7 +523,7 @@ class history:
         else:
             img_flipped = img
 
-        image_out = StringIO()
+        image_out = BytesIO()
         img_flipped.save(image_out, 'jpeg')
         i['data'] = image_out.getvalue()
 
