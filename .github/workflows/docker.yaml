@@ -41,7 +41,6 @@ jobs:
       with:
         context: .
         file: ./Dockerfile
-        platforms: linux/amd64
         cache-from: type=gha
         cache-to: type=gha,mode=max
         push: ${{ github.event_name != 'pull_request' }}
