@@ -1,0 +1,11 @@
+/*.jpg
+/sessions
+/twitter_config.json
+*.pyc
+/images
+/logs
+.vscode
+.venv
+.DS_Store
+__pychache__
+Dockerfile
