@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  graphotti:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    restart: "unless-stopped"
+    shm_size: '512m'
+    environment:
+      # This is the password required when accessing the master view
+      GRAPHOTTI_MASTER: "${GRAPHOTTI_MASTER:-foo}"
+    image: lcas.lincoln.ac.uk/mhanheide/graphotti:master
+    volumes:
+      - ./data/logs:/code/logs
+      - ./data/images:/code/images
+    ports:
+      # exposing the main port to access the desktop at https://localhost:6901, port can be overridden by setting HTTPS_PORT
+      - "${HTTPS_PORT:-8000}:8000"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "2000k"
+        max-file: "10"
