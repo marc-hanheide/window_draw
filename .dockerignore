@@ -4,5 +4,8 @@
 *.pyc
 /images
 /logs
-.vscode/launch.json
+.vscode
+.venv
 .DS_Store
+__pychache__
+Dockerfile
