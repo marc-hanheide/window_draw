@@ -107,7 +107,7 @@ class Acc():
         block = False
         web.header("Content-Type", "text/event-stream")
         web.header('Cache-Control', 'no-cache')
-        web.header('Content-length:', 0)
+        #web.header('Content-length:', 0)
         while is_running:
             new_acc_cond.acquire()
             try:
@@ -175,7 +175,7 @@ class PhotoServer():
         global last_photo_base64
         web.header("Content-Type", "text/event-stream")
         web.header('Cache-Control', 'no-cache')
-        web.header('Content-length:', 0)
+        #web.header('Content-length:', 0)
         block = False
 
         while is_running:
@@ -547,7 +547,7 @@ class SSEServer:
         block = False
         web.header("Content-Type", "text/event-stream")
         web.header('Cache-Control', 'no-cache')
-        web.header('Content-length:', 0)
+        #web.header('Content-length:', 0)
         while is_running:
             new_path_cond.acquire()
             try:
