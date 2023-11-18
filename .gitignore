@@ -4,5 +4,6 @@
 *.pyc
 /images
 /logs
+/data/*
 .vscode/launch.json
 .DS_Store
