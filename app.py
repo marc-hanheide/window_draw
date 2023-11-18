@@ -33,17 +33,17 @@ from geopy.distance import Geodesic
 
 
 urls = (
-    '/', 'index',
-    '/simple', 'index_simple',
-    '/history(.*)', 'history',
-    '/image_store', 'image_store',
-    '/tweet', 'tweet',
-    '/sse', 'SSEServer',
-    '/view', 'view',
-    '/acc', 'Acc',
-    '/about', 'about',
-    '/photo', 'PhotoServer',
-    '/log', 'LogServer'
+    '/graphotti', 'index',
+    '/graphotti/simple', 'index_simple',
+    '/graphotti/history(.*)', 'history',
+    '/graphotti/image_store', 'image_store',
+    '/graphotti/tweet', 'tweet',
+    '/graphotti/sse', 'SSEServer',
+    '/graphotti/view', 'view',
+    '/graphotti/acc', 'Acc',
+    '/graphotti/about', 'about',
+    '/graphotti/photo', 'PhotoServer',
+    '/graphotti/log', 'LogServer'
 )
 
 #print(os.environ)
