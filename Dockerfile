@@ -14,5 +14,6 @@ COPY . /code/
 RUN pip install -r requirements.txt
 RUN chown -R www-data:www-data /code
 CMD mod_wsgi-express start-server /code/app.py \
-    --user www-data --group www-data --url-alias /static ./static --log-to-terminal
+    --user www-data --group www-data --url-alias /static ./static --log-to-terminal \
+    --processes 1 --threads 50
 #    --https-port 8443 --https-only --server-name www.hanheide.net --ssl-certificate-file ./server.cert --ssl-certificate-key-file ./server.key
