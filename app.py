@@ -34,6 +34,7 @@ from geopy.distance import Geodesic
 
 urls = (
     '/graphotti', 'index',
+    '/graphotti/', 'index',
     '/graphotti/simple', 'index_simple',
     '/graphotti/history(.*)', 'history',
     '/graphotti/image_store', 'image_store',

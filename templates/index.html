@@ -40,7 +40,7 @@ $var title: GraPHOtti.
 				<div class="panel panel-info">
 					<a id="canny_anchor" name="canny"></a>
 					<div class="panel-heading">
-						<a href="#canny"><h3 class="panel-title"><span class="glyphicon glyphicon-camera"></span>&nbsp;Camera <small>if your phone supports it, you can post an artisitic photo on the window.</small></h3></a>
+						<a href="#canny"><h3 class="panel-title"><span class="glyphicon glyphicon-camera"></span>&nbsp;Camera/Background <small>if your phone supports it, you can post an artisitic photo on the window.</small></h3></a>
 					</div>
 					<div class="panel-body">
 						<video hidden id="video" width="600" height="600"></video>
@@ -53,7 +53,7 @@ $var title: GraPHOtti.
 								If you are ask to give this website permission to access your camera, please do so for full experience.							
 								<br/>
 								It can be a few more seconds...
-								If you don't see a video here soon, don't worry, you can still <a href="#history">pick a previous shot</a> or simply <a href="#draw">doodle</a> along on other people's shots.
+								If you don't see a video here soon, don't worry, you can still pick <a href="#history">a previous shot</a> or one of <a href="#bg">provided backgrounds</a> or simply <a href="#draw">doodle</a> along on the current image.
 							</p>
 							<div class="progress">
 								<div id="progress" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 20%;">
@@ -97,11 +97,26 @@ $var title: GraPHOtti.
 							</div>
 						</div>
 						<div>
+							<a id="bg" name="bg"></a>
+							<h3>Available Backgrounds <small>(click to use)</small></h3>
+							<table class="table">
+								<tr>
+									$for h in range(0,4):
+										<td>
+											<img 
+												class="img-responsive" id="bg_$h" src="static/bg/bg_${h}.png"
+												onclick="click_history(this);"
+												>
+										</td>
+								</tr>
+							</table>
+						</div>
+						<div>
 							<a id="history" name="history"></a>
 							<h3>Recent snaps <small>(click to reuse)</small></h3>
 							<table class="table">
 								<tr>
-									$for h in range(0,4):
+									$for h in range(0,8):
 										<td>
 											<img 
 												class="img-responsive" id="hist_$h" src=""
@@ -109,7 +124,7 @@ $var title: GraPHOtti.
 												>
 										</td>
 								</tr>
-								<tr>
+								<!-- <tr>
 										$for h in range(4,8):
 											<td>
 												<img 
@@ -117,8 +132,8 @@ $var title: GraPHOtti.
 													onclick="click_history(this);"
 													>
 											</td>
-									</tr>
-								</table>
+								</tr> -->
+							</table>
 						</div>
 					</div>				
 				</div>
